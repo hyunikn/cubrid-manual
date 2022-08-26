@@ -12,11 +12,11 @@ LOB 함수
 BIT_TO_BLOB
 ===========
 
-.. function:: BIT_TO_BLOB ( blob_type_column_or_value )
+.. function:: BIT_TO_BLOB ( bit_type_column_or_value )
 
-    **BIT**, **VARYING BIT** 타입을 **BLOB** 타입으로 변환한다.
+    **BIT**, **BIT VARYING** 타입을 **BLOB** 타입으로 변환한다.
 
-    :param blob_type_column_or_value: 변환 대상 칼럼 또는 값
+    :param bit_type_column_or_value: 변환 대상 칼럼 또는 값
     :rtype: BLOB
 
 BLOB_FROM_FILE

@@ -1,6 +1,6 @@
 
 :meta-keywords: cubrid ascii, cubrid concatenation, cubrid lower, cubrid upper, cubrid chr, cubrid find_in_set, cubrid repeat, cubrid replace, cubrid substr
-      
+
 :tocdepth: 3
 
 ********************
@@ -9,7 +9,7 @@
 
 .. contents::
 
-.. note:: 
+.. note::
 
     문자열 함수에서 **oracle_style_empty_string** 파라미터의 설정 값이 yes이면, 빈 문자열("")과 NULL을 구분하지 않고 함수에 따라 모두 NULL로 취급하거나 모두 빈 문자열로 취급한다. 이와 관련한 자세한 설명은 :ref:`oracle_style_empty_string <oracle_style_empty_string>`\ 을 참고한다.
 
@@ -22,11 +22,11 @@ SQL 구문 관련 파라미터인 **pipes_as_concat** 파라미터(기본값: ye
 
     <concat_operand1> +  <concat_operand1>
     <concat_operand2> || <concat_operand2>
-    
+
         <concat_operand1> ::=
             bit string |
             NULL
-         
+
         <concat_operand2> ::=
             bit string |
             character string
@@ -38,37 +38,37 @@ SQL 구문 관련 파라미터인 **pipes_as_concat** 파라미터(기본값: ye
 .. code-block:: sql
 
     SELECT 'CUBRID' || ',' + '2008';
-    
+
 ::
 
      'CUBRID'||','+'2008'
     ======================
       'CUBRID,2008'
-     
+
 .. code-block:: sql
 
     SELECT 'cubrid' || ',' || B'0010' ||B'0000' ||B'0000' ||B'1000';
-    
+
 ::
 
      'cubrid'||','||B'0010'||B'0000'||B'0000'||B'1000'
     ======================
       'cubrid,2008'
-     
+
 .. code-block:: sql
 
     SELECT ((EXTRACT(YEAR FROM SYS_TIMESTAMP))||(EXTRACT(MONTH FROM SYS_TIMESTAMP)));
-    
+
 ::
 
      (( extract(year  from  SYS_TIMESTAMP ))||( extract(month  from  SYS_TIMESTAMP )))
     ======================
       '200812'
-     
+
 .. code-block:: sql
 
     SELECT 'CUBRID' || ',' + NULL;
-    
+
 ::
 
      'CUBRID'||','+null
@@ -83,20 +83,20 @@ ASCII
     **ASCII** 함수는 인자로 지정된 문자열의 가장 좌측 문자에 대한 ASCII 코드 값을 숫자로 반환한다. 입력 문자열이 **NULL** 이면 **NULL** 을 반환한다. **ASCII** 함수는 1바이트 문자에 대해 동작한다. 숫자가 입력되면 문자열로 변환한 후 가장 왼쪽 문자의 ASCII 코드 값을 반환한다.
 
     :param str: 입력 문자열
-    :rtype: STRING
+    :rtype: SMALLINT
 
 .. code-block:: sql
 
     SELECT ASCII('5');
-    
+
 ::
 
     53
-    
+
 .. code-block:: sql
 
     SELECT ASCII('ab');
-    
+
 ::
 
     97
@@ -114,7 +114,7 @@ BIN
 .. code-block:: sql
 
     SELECT BIN(12);
-    
+
 ::
 
     '1100'
@@ -126,50 +126,50 @@ BIT_LENGTH
 
     **BIT_LENGTH** 함수는 문자열 또는 비트열의 길이(bit)를 정수값으로 반환한다. 단, 문자열의 경우 데이터 입력 환경의 문자셋(character set)에 따라 한 문자가 차지하는 바이트 수가 다르므로, **BIT_LENGTH** 함수의 리턴 값 역시 문자셋에 따라 다를 수 있다(예: UTF-8 한글: 한 글자에 3*8비트). CUBRID가 지원하는 문자셋에 관한 상세한 설명은 :ref:`char-data-type` 을 참고한다. 유효하지 않은 값을 입력할 때 **cubrid.conf**\ 의 **return_null_on_function_errors** 파라미터의 값이 no(기본값)면 에러, yes면 NULL을 반환한다.
 
-    :param string: 비트 단위로 길이를 구할 문자열 또는 비트열을 지정한다. **NULL** 이 지정된 경우는 **NULL** 값이 반환된다. 
+    :param string: 비트 단위로 길이를 구할 문자열 또는 비트열을 지정한다. **NULL** 이 지정된 경우는 **NULL** 값이 반환된다.
     :rtype: INT
 
 .. code-block:: sql
 
     SELECT BIT_LENGTH('');
-    
+
 ::
 
        bit_length('')
     =================
                     0
-     
+
 .. code-block:: sql
 
     SELECT BIT_LENGTH('CUBRID');
-    
+
 ::
 
        bit_length('CUBRID')
     =======================
                          48
-     
+
 .. code-block:: sql
 
     -- UTF-8 Korean character
     SELECT BIT_LENGTH('큐브리드');
-    
+
 ::
 
          bit_length('큐브리드')
     =========================
                            96
-     
+
 .. code-block:: sql
 
     SELECT BIT_LENGTH(B'010101010');
-    
+
 ::
 
        bit_length(B'010101010')
     ===========================
                               9
-     
+
 .. code-block:: sql
 
     CREATE TABLE bit_length_tbl (char_1 CHAR, char_2 CHAR(5), varchar_1 VARCHAR, bit_var_1 BIT VARYING);
@@ -177,9 +177,9 @@ BIT_LENGTH
     INSERT INTO bit_length_tbl VALUES('a', 'a', 'a', B'010101010'); --English character
     INSERT INTO bit_length_tbl VALUES(NULL, '큐', '큐', B'010101010'); --UTF-8 Korean character and NULL
     INSERT INTO bit_length_tbl VALUES(' ', ' 큐', ' 큐', B'010101010'); --UTF-8 Korean character and space
-     
+
     SELECT BIT_LENGTH(char_1), BIT_LENGTH(char_2), BIT_LENGTH(varchar_1), BIT_LENGTH(bit_var_1) FROM bit_length_tbl;
-     
+
 ::
 
     bit_length(char_1)  bit_length(char_2)      bit_length(varchar_1)   bit_length(bit_var_1)
@@ -187,7 +187,7 @@ BIT_LENGTH
     8                   40                       0                       0
     8                   40                       8                       9
     NULL                56                      24                       9
-    8                   40                      32                       9
+    8                   56                      32                       9
 
 CHAR_LENGTH, CHARACTER_LENGTH, LENGTHB, LENGTH
 ==============================================
@@ -213,33 +213,33 @@ CHAR_LENGTH, CHARACTER_LENGTH, LENGTHB, LENGTH
 
     --character set is UTF-8 for Korean characters
     SELECT LENGTH('');
-    
+
 ::
 
-    char length('')
+    char_length('')
     ==================
                      0
-     
+
 .. code-block:: sql
 
     SELECT LENGTH('CUBRID');
-    
+
 ::
 
-    char length('CUBRID')
+    char_length('CUBRID')
     ==================
                      6
-     
+
 .. code-block:: sql
 
     SELECT LENGTH('큐브리드');
-    
+
 ::
 
-    char length('큐브리드')
+    char_length('큐브리드')
     ==================
                      4
-     
+
 .. code-block:: sql
 
     CREATE TABLE length_tbl (char_1 CHAR, char_2 CHAR(5), varchar_1 VARCHAR, varchar_2 VARCHAR);
@@ -247,9 +247,9 @@ CHAR_LENGTH, CHARACTER_LENGTH, LENGTHB, LENGTH
     INSERT INTO length_tbl VALUES('a', 'a', 'a', 'a'); --English character
     INSERT INTO length_tbl VALUES(NULL, '큐', '큐', '큐'); --Korean character and NULL
     INSERT INTO length_tbl VALUES(' ', ' 큐', ' 큐', ' 큐'); --Korean character and space
-     
+
     SELECT LENGTH(char_1), LENGTH(char_2), LENGTH(varchar_1), LENGTH(varchar_2) FROM length_tbl;
-     
+
 ::
 
     char_length(char_1) char_length(char_2) char_length(varchar_1) char_length(varchar_2)
@@ -266,45 +266,45 @@ CHR
 
     **CHR** 함수는 인자로 지정된 연산식의 리턴 값에 대응하는 문자를 반환하는 함수이다. 유효하지 않은 범위의 코드 값을 입력할 때 **cubrid.conf**\ 의 **return_null_on_function_errors** 파라미터의 값이 no(기본값)면 에러, yes면 NULL을 반환한다.
 
-    :param number_operand: 수치값을 반환하는 임의의 연산식을 지정한다. 
+    :param number_operand: 수치값을 반환하는 임의의 연산식을 지정한다.
     :param charset_name: 문자셋 이름. 지원하는 문자셋은 utf8과 iso88591이다.
     :rtype: STRING
 
 .. code-block:: sql
 
     SELECT CHR(68) || CHR(68-2);
-    
+
 ::
 
-       chr(68)|| chr(68-2)
+       chr(68 using utf8)|| chr(68-2 using utf8)
     ======================
       'DB'
 
-**CHR** 함수를 사용해서 멀티바이트 문자를 반환하려면 해당 문자셋에 대해 유효한 범위의 숫자를 입력한다. 
+**CHR** 함수를 사용해서 멀티바이트 문자를 반환하려면 해당 문자셋에 대해 유효한 범위의 숫자를 입력한다.
 
 .. code-block:: sql
 
-    SELECT CHR(14909886 USING utf8); 
+    SELECT CHR(14909886 USING utf8);
     -- Below query's result is the same as above.
-    SET NAMES utf8; 
-    SELECT CHR(14909886); 
-    
+    SET NAMES utf8;
+    SELECT CHR(14909886);
+
 ::
 
-       chr(14909886 using utf8) 
-    ====================== 
-      'ま' 
+       chr(14909886 using utf8)
+    ======================
+      'ま'
 
 문자를 16진수 문자열로 반환하려면 **HEX** 함수를 사용한다.
 
 .. code-block:: sql
 
-    SET NAMES utf8; 
+    SET NAMES utf8;
     SELECT HEX('ま');
 
 ::
 
-       hex(_utf8'ま')
+       hex('ま')
     ======================
       'E381BE'
 
@@ -312,12 +312,12 @@ CHR
 
 .. code-block:: sql
 
-    SET NAMES utf8; 
+    SET NAMES utf8;
     SELECT CONV('E381BE',16,10);
-    
+
 ::
 
-       conv(_utf8'E381BE', 16, 10)
+       conv('E381BE', 16, 10)
     ======================
       '14909886'
 
@@ -336,36 +336,36 @@ CONCAT
 .. code-block:: sql
 
     SELECT CONCAT('CUBRID', '2008' , 'R3.0');
-    
+
 ::
 
        concat('CUBRID', '2008', 'R3.0')
     ======================
     'CUBRID2008R3.0'
-     
+
 .. code-block:: sql
 
     --it returns null when null is specified for one of parameters
     SELECT CONCAT('CUBRID', '2008' , 'R3.0', NULL);
-    
+
 ::
 
        concat('CUBRID', '2008', 'R3.0', null)
     ======================
       NULL
-     
-     
+
+
 .. code-block:: sql
 
     --it converts number types and then returns concatenated strings
     SELECT CONCAT(2008, 3.0);
-    
+
 ::
 
        concat(2008, 3.0)
     ======================
       '20083.0'
-      
+
 CONCAT_WS
 =========
 
@@ -379,29 +379,29 @@ CONCAT_WS
 .. code-block:: sql
 
     SELECT CONCAT_WS(' ', 'CUBRID', '2008' , 'R3.0');
-    
+
 ::
 
     concat_ws(' ', 'CUBRID', '2008', 'R3.0')
     ======================
       'CUBRID 2008 R3.0'
-     
+
 .. code-block:: sql
 
     --it returns strings even if null is specified for one of parameters
     SELECT CONCAT_WS(' ', 'CUBRID', '2008', NULL, 'R3.0');
-    
+
 ::
 
     concat_ws(' ', 'CUBRID', '2008', null, 'R3.0')
     ======================
       'CUBRID 2008 R3.0'
-     
+
 .. code-block:: sql
 
     --it converts number types and then returns concatenated strings with separator
     SELECT CONCAT_WS(' ',2008, 3.0);
-    
+
 ::
 
     concat_ws(' ', 2008, 3.0)
@@ -426,57 +426,57 @@ ELT
 .. code-block:: sql
 
     SELECT ELT(3,'string1','string2','string3');
-    
+
 ::
 
       elt(3, 'string1', 'string2', 'string3')
     ======================
       'string3'
-     
+
 .. code-block:: sql
 
     SELECT ELT('3','1/1/1','23:00:00','2001-03-04');
-    
+
 ::
 
       elt('3', '1/1/1', '23:00:00', '2001-03-04')
     ======================
       '2001-03-04'
-     
+
 .. code-block:: sql
 
     SELECT ELT(-1, 'string1','string2','string3');
-    
+
 ::
 
       elt(-1, 'string1','string2','string3')
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     SELECT ELT(4,'string1','string2','string3');
-    
+
 ::
 
       elt(4, 'string1', 'string2', 'string3')
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     SELECT ELT(3.2,'string1','string2','string3');
-    
+
 ::
 
       elt(3.2, 'string1', 'string2', 'string3')
     ======================
       'string3'
-     
+
 .. code-block:: sql
 
     SELECT ELT('a','string1','string2','string3');
-     
+
 ::
 
     ERROR: Cannot coerce 'a' to type bigint.
@@ -497,49 +497,49 @@ FIELD
 .. code-block:: sql
 
     SELECT FIELD('abc', 'a', 'ab', 'abc', 'abcd', 'abcde');
-    
+
 ::
 
        field('abc', 'a', 'ab', 'abc', 'abcd', 'abcde')
     ==================================================
                                                      3
-     
+
 .. code-block:: sql
 
     --it returns 0 when no same string is found in the list
     SELECT FIELD('abc', 'a', 'ab', NULL);
-    
+
 ::
 
        field('abc', 'a', 'ab', null)
     ================================
                                    0
-     
+
 .. code-block:: sql
 
     --it returns 0 when null is specified in the first parameter
     SELECT FIELD(NULL, 'a', 'ab', NULL);
-    
+
 ::
 
        field(null, 'a', 'ab', null)
     ===============================
                                   0
-     
+
 .. code-block:: sql
 
     SELECT FIELD('123', 1, 12, 123.0, 1234, 12345);
-    
+
 ::
 
        field('123', 1, 12, 123.0, 1234, 12345)
     ==========================================
                                              0
-     
+
 .. code-block:: sql
 
     SELECT FIELD(123, 1, 12, '123.0', 1234, 12345);
-    
+
 ::
 
        field(123, 1, 12, '123.0', 1234, 12345)
@@ -560,31 +560,31 @@ FIND_IN_SET
 .. code-block:: sql
 
     SELECT FIND_IN_SET('b','a,b,c,d');
-    
+
 ::
 
     2
 
-FROM_BASE64 
-=========== 
+FROM_BASE64
+===========
 
-.. function:: FROM_BASE64(str) 
+.. function:: FROM_BASE64(str)
 
-    **FROM_BASE64** 함수는 **TO_BASE64** 함수에서 사용되는 base-64 암호화 규칙으로 암호화된 문자열을 인자로 입력받아 복호화된 결과를 바이너리 문자열로 반환한다. 입력 인자가 **NULL**\이면 **NULL**\을 반환한다. 유효하지 않은 base-64 문자열일 때 **cubrid.conf**\의 **return_null_on_function_errors** 파라미터의 값이 no(기본값)면 에러, yes면 NULL을 반환한다. 
-    암호화 규칙에 대한 상세 내용은 :func:`TO_BASE64`\를 참고한다. 
-     
-    :param str: 입력 문자열 
-    :rtype: STRING 
+    **FROM_BASE64** 함수는 **TO_BASE64** 함수에서 사용되는 base-64 암호화 규칙으로 암호화된 문자열을 인자로 입력받아 복호화된 결과를 바이너리 문자열로 반환한다. 입력 인자가 **NULL**\이면 **NULL**\을 반환한다. 유효하지 않은 base-64 문자열일 때 **cubrid.conf**\의 **return_null_on_function_errors** 파라미터의 값이 no(기본값)면 에러, yes면 NULL을 반환한다.
+    암호화 규칙에 대한 상세 내용은 :func:`TO_BASE64`\를 참고한다.
 
-.. code-block:: sql 
+    :param str: 입력 문자열
+    :rtype: STRING
 
-    SELECT TO_BASE64('abcd'), FROM_BASE64(TO_BASE64('abcd')); 
-     
-:: 
+.. code-block:: sql
 
-       to_base64('abcd') from_base64( to_base64('abcd')) 
-    ============================================ 
-      'YWJjZA==' 'abcd' 
+    SELECT TO_BASE64('abcd'), FROM_BASE64(TO_BASE64('abcd'));
+
+::
+
+       to_base64('abcd') from_base64( to_base64('abcd'))
+    ============================================
+      'YWJjZA==' 'abcd'
 
 .. seealso::
 
@@ -602,61 +602,61 @@ INSERT
     :param len: *str* 의 *pos* 에 삽입할 *string* 의 길이. *len* 이 부분 문자열의 길이를 초과하면, *str* 의 *pos* 에서 *string* 만큼 삽입한다. *len* 이 음수이면 *str* 이 문자열의 끝이 된다.
     :param string: *str* 에 삽입할 부분 문자열
     :rtype: STRING
-    
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',2,2,'dbsql');
-    
+
 ::
 
       insert('cubrid', 2, 2, 'dbsql')
     ======================
       'cdbsqlrid'
-     
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',0,3,'db');
-    
+
 ::
 
       insert('cubrid', 0, 3, 'db')
     ======================
       'cubrid'
-     
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',-3,3,'db');
-    
+
 ::
 
       insert('cubrid', -3, 3, 'db')
     ======================
       'cubrid'
-     
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',3,100,'db');
-    
+
 ::
 
       insert('cubrid', 3, 100, 'db')
     ======================
       'cudb'
-     
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',7,100,'db');
-    
+
 ::
 
       insert('cubrid', 7, 100, 'db')
     ======================
       'cubriddb'
-     
+
 .. code-block:: sql
 
     SELECT INSERT('cubrid',3,-1,'db');
-    
+
 ::
 
       insert('cubrid', 3, -1, 'db')
@@ -674,7 +674,7 @@ INSTR
     :param substring: 위치를 반환할 문자열을 지정한다.
     :param position: 선택 사항으로 탐색을 시작할 *string* 의 위치를 나타내며, 문자 개수 단위로 지정된다. 이 인자가 생략되면 기본값인 **1** 이 적용된다. *string* 의 첫 번째 위치는 1로 지정된다. 값이 음수이면 *string* 의 끝에서부터 지정된 값만큼 떨어진 위치에서 역방향으로 *string* 을 탐색한다.
     :rtype: INT
-    
+
 .. note::
 
     CUBRID 9.0 미만 버전에서는 문자 단위가 아닌 바이트 단위로 위치를 반환한다는 점을 주의한다. CUBRID 9.0 미만 버전에서 멀티바이트 문자셋이면 한 문자를 표현하는 바이트 수가 다르므로 반환되는 결과 값이 다를 수 있다.
@@ -684,62 +684,62 @@ INSTR
     --character set is UTF-8 for Korean characters
     --it returns position of the first 'b'
     SELECT INSTR ('12345abcdeabcde','b');
-    
+
 ::
 
        instr('12345abcdeabcde', 'b', 1)
     ===================================
                                       7
-     
+
 .. code-block:: sql
 
     -- it returns position of the first '나' on UTF-8 Korean charset
     SELECT INSTR ('12345가나다라마가나다라마', '나' );
-    
+
 ::
 
        instr('12345가나다라마가나다라마', '나', 1)
     =================================
                                     7
-     
+
 .. code-block:: sql
 
     -- it returns position of the second '나' on UTF-8 Korean charset
     SELECT INSTR ('12345가나다라마가나다라마', '나', 11 );
-    
+
 ::
 
        instr('12345가나다라마가나다라마', '나', 11)
     =================================
                                    12
-     
+
 .. code-block:: sql
 
     --it returns position of the 'b' searching from the 8th position
     SELECT INSTR ('12345abcdeabcde','b', 8);
-    
+
 ::
 
        instr('12345abcdeabcde', 'b', 8)
     ===================================
                                      12
-     
+
 .. code-block:: sql
 
     --it returns position of the 'b' searching backwardly from the end
     SELECT INSTR ('12345abcdeabcde','b', -1);
-    
+
 ::
 
        instr('12345abcdeabcde', 'b', -1)
     ====================================
                                       12
-     
+
 .. code-block:: sql
 
     --it returns position of the 'b' searching backwardly from a specified position
     SELECT INSTR ('12345abcdeabcde','b', -8);
-    
+
 ::
 
        instr('12345abcdeabcde', 'b', -8)
@@ -760,27 +760,27 @@ LCASE, LOWER
 .. code-block:: sql
 
     SELECT LOWER('');
-    
+
 ::
 
       lower('')
     ======================
       ''
-     
+
 .. code-block:: sql
 
     SELECT LOWER(NULL);
-    
+
 ::
 
       lower(null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     SELECT LOWER('Cubrid');
-    
+
 ::
 
       lower('Cubrid')
@@ -792,7 +792,7 @@ LCASE, LOWER
 콜레이션이 utf8_bin이면 이 문자는 변환되지 않는다.
 
 .. code-block:: sql
-    
+
     SET NAMES utf8 COLLATE utf8_bin;
     SELECT LOWER('Ă');
 
@@ -806,7 +806,7 @@ LCASE, LOWER
 
     SET NAMES utf8 COLLATE utf8_ro_cs;
     SELECT LOWER('Ă');
-    
+
        lower(_utf8'Ă' COLLATE utf8_ro_cs)
     ======================
       'ă'
@@ -827,17 +827,17 @@ LEFT
 .. code-block:: sql
 
     SELECT LEFT('CUBRID', 3);
-    
+
 ::
 
      left('CUBRID', 3)
     ======================
       'CUB'
-     
+
 .. code-block:: sql
 
     SELECT LEFT('CUBRID', 10);
-    
+
 ::
 
       left('CUBRID', 10)
@@ -853,47 +853,47 @@ LOCATE
 
     :param substring: 검색 대상 문자열의 패턴
     :param string: 전체 문자열
-    :param position: 검색 시작 위치 
+    :param position: 검색 시작 위치
     :rtype: INT
-    
+
 .. code-block:: sql
 
     --it returns 1 when substring is empty space
     SELECT LOCATE ('', '12345abcdeabcde');
-    
+
 ::
 
      locate('', '12345abcdeabcde')
     ===============================
                                  1
-     
+
 .. code-block:: sql
 
     --it returns position of the first 'abc'
     SELECT LOCATE ('abc', '12345abcdeabcde');
-    
+
 ::
 
      locate('abc', '12345abcdeabcde')
     ================================
                                    6
-     
+
 .. code-block:: sql
 
     --it returns position of the second 'abc'
     SELECT LOCATE ('abc', '12345abcdeabcde', 8);
-    
+
 ::
 
      locate('abc', '12345abcdeabcde', 8)
     ======================================
                                       11
-     
+
 .. code-block:: sql
 
     --it returns 0 when no substring found in the string
     SELECT LOCATE ('ABC', '12345abcdeabcde');
-    
+
 ::
 
      locate('ABC', '12345abcdeabcde')
@@ -919,62 +919,62 @@ LPAD
 .. code-block:: sql
 
     --character set is UTF-8 for Korean characters
-     
+
     --it returns only 3 characters if not enough length is specified
     SELECT LPAD ('CUBRID', 3, '?');
-    
+
 ::
 
       lpad('CUBRID', 3, '?')
     ======================
       'CUB'
-     
+
     SELECT LPAD ('큐브리드', 3, '?');
-    
+
 ::
 
      lpad('큐브리드', 3, '?')
     ======================
       '큐브리'
-     
+
 .. code-block:: sql
 
     --padding spaces on the left till char_length is 10
     SELECT LPAD ('CUBRID', 10);
-    
+
 ::
 
      lpad('CUBRID', 10)
     ======================
       '    CUBRID'
-     
+
 .. code-block:: sql
 
     --padding specific characters on the left till char_length is 10
     SELECT LPAD ('CUBRID', 10, '?');
-    
+
 ::
 
      lpad('CUBRID', 10, '?')
     ======================
       '????CUBRID'
-     
+
 .. code-block:: sql
 
     --padding specific characters on the left till char_length is 10
     SELECT LPAD ('큐브리드', 10, '?');
-    
+
 ::
 
      lpad('큐브리드', 10, '?')
     ======================
       '??????큐브리드'
-     
+
 .. code-block:: sql
 
     --padding 4 characters on the left
     SELECT LPAD ('큐브리드', LENGTH('큐브리드')+4, '?');
-    
+
 ::
 
      lpad('큐브리드',  char_length('큐브리드')+4, '?')
@@ -996,29 +996,29 @@ LTRIM
 
     --trimming spaces on the left
     SELECT LTRIM ('     Olympic     ');
-    
+
 ::
 
       ltrim('     Olympic     ')
     ======================
       'Olympic     '
-     
+
 .. code-block:: sql
 
     --If NULL is specified, it returns NULL
     SELECT LTRIM ('iiiiiOlympiciiiii', NULL);
-    
+
 ::
 
       ltrim('iiiiiOlympiciiiii', null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     -- trimming specific strings on the left
     SELECT LTRIM ('iiiiiOlympiciiiii', 'i');
-    
+
 ::
 
       ltrim('iiiiiOlympiciiiii', 'i')
@@ -1043,43 +1043,43 @@ MID
 
     CREATE TABLE mid_tbl(a VARCHAR);
     INSERT INTO mid_tbl VALUES('12345abcdeabcde');
-     
+
     --it returns empty string when substring_length is 0
     SELECT MID(a, 6, 0), SUBSTR(a, 6, 0), SUBSTRING(a, 6, 0) FROM mid_tbl;
-    
+
 ::
 
       mid(a, 6, 0)          substr(a, 6, 0)       substring(a from 6 for 0)
     ==================================================================
       ''                    ''                    ''
-     
+
 .. code-block:: sql
 
     --it returns 4-length substrings counting from the 6th position
     SELECT MID(a, 6, 4), SUBSTR(a, 6, 4), SUBSTRING(a, 6, 4) FROM mid_tbl;
-    
+
 ::
 
       mid(a, 6, 4)          substr(a, 6, 4)       substring(a from 6 for 4)
     ==================================================================
       'abcd'                'abcd'                'abcd'
-     
+
 .. code-block:: sql
 
     --it returns an empty string when substring_length < 0
     SELECT MID(a, 6, -4), SUBSTR(a, 6, -4), SUBSTRING(a, 6, -4) FROM mid_tbl;
-    
+
 ::
 
       mid(a, 6, -4)         substr(a, 6, -4)      substring(a from 6 for -4)
     ==================================================================
       ''                    NULL                  'abcdeabcde'
-     
+
 .. code-block:: sql
 
     --it returns 4-length substrings at 6th position counting backward from the end
     SELECT MID(a, -6, 4), SUBSTR(a, -6, 4), SUBSTRING(a, -6, 4) FROM mid_tbl;
-    
+
 ::
 
       mid(a, -6, 4)         substr(a, -6, 4)      substring(a from -6 for 4)
@@ -1101,45 +1101,45 @@ OCTET_LENGTH
 .. code-block:: sql
 
     --character set is UTF-8 for Korean characters
-     
+
     SELECT OCTET_LENGTH('');
-    
+
 ::
 
      octet_length('')
     ==================
                      0
-     
+
 .. code-block:: sql
 
     SELECT OCTET_LENGTH('CUBRID');
-    
+
 ::
 
      octet_length('CUBRID')
     ==================
                      6
-     
+
 .. code-block:: sql
 
     SELECT OCTET_LENGTH('큐브리드');
-    
+
 ::
 
      octet_length('큐브리드')
     ==================
                      12
-     
+
 .. code-block:: sql
 
     SELECT OCTET_LENGTH(B'010101010');
-    
+
 ::
 
      octet_length(B'010101010')
     ==================
                      2
-     
+
 .. code-block:: sql
 
     CREATE TABLE octet_length_tbl (char_1 CHAR, char_2 CHAR(5), varchar_1 VARCHAR, bit_var_1 BIT VARYING);
@@ -1147,9 +1147,9 @@ OCTET_LENGTH
     INSERT INTO octet_length_tbl VALUES('a', 'a', 'a', B'010101010'); --English character
     INSERT INTO octet_length_tbl VALUES(NULL, '큐', '큐', B'010101010'); --Korean character and NULL
     INSERT INTO octet_length_tbl VALUES(' ', ' 큐', ' 큐', B'010101010'); --Korean character and space
-     
+
     SELECT OCTET_LENGTH(char_1), OCTET_LENGTH(char_2), OCTET_LENGTH(varchar_1), OCTET_LENGTH(bit_var_1) FROM octet_length_tbl;
-    
+
 ::
 
     octet_length(char_1) octet_length(char_2) octet_length(varchar_1) octet_length(bit_var_1)
@@ -1171,7 +1171,7 @@ POSITION
     **POSITION** 함수는 가끔 다른 함수와 연결되어서 사용된다. 예를 들어, 특정 문자열에서 일부 문자열을 추출하고 싶은 경우에 **POSITION** 함수의 결과를 **SUBSTRING** 함수의 입력으로 사용할 수 있다.
 
     .. note::
-    
+
         CUBRID 9.0 미만 버전에서는 문자 단위가 아닌 바이트 단위로 위치를 반환한다는 점을 주의한다. 멀티바이트 문자셋에서는 한 문자를 표현하는 바이트 수가 다르므로 반환되는 결과 값이 다를 수 있다.
 
     :param substring: 위치를 반환할 문자열을 지정한다. 값이 공백 문자열이면 1이 반환된다. **NULL** 이면 **NULL** 이 반환된다.
@@ -1180,53 +1180,53 @@ POSITION
 .. code-block:: sql
 
     --character set is UTF-8 for Korean characters
-     
+
     --it returns 1 when substring is empty space
     SELECT POSITION ('' IN '12345abcdeabcde');
-    
+
 ::
 
       position('' in '12345abcdeabcde')
     ===============================
                                   1
-     
+
 .. code-block:: sql
 
     --it returns position of the first 'b'
     SELECT POSITION ('b' IN '12345abcdeabcde');
-    
+
 ::
 
       position('b' in '12345abcdeabcde')
     ================================
                                    7
-     
+
 .. code-block:: sql
 
     -- it returns position of the first '나'
     SELECT POSITION ('나' IN '12345가나다라마가나다라마');
-    
+
 ::
 
       position('나' in '12345가나다라마가나다라마')
     =================================
                                     7
-     
+
 .. code-block:: sql
 
     --it returns 0 when no substring found in the string
     SELECT POSITION ('f' IN '12345abcdeabcde');
-    
+
 ::
 
       position('f' in '12345abcdeabcde')
     =================================
                                     0
-     
+
 .. code-block:: sql
 
     SELECT POSITION (B'1' IN B'000011110000');
-    
+
 ::
 
       position(B'1' in B'000011110000')
@@ -1247,37 +1247,37 @@ REPEAT
 .. code-block:: sql
 
     SELECT REPEAT('cubrid',3);
-    
+
 ::
 
        repeat('cubrid', 3)
     ======================
       'cubridcubridcubrid'
-     
+
 .. code-block:: sql
 
     SELECT REPEAT('cubrid',32000000);
-    
+
 ::
 
        repeat('cubrid', 32000000)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     SELECT REPEAT('cubrid',-1);
-    
+
 ::
 
        repeat('cubrid', -1)
     ======================
       ''
-     
+
 .. code-block:: sql
 
     SELECT REPEAT('cubrid','a');
-    
+
 ::
 
     ERROR: Cannot coerce 'a' to type integer.
@@ -1298,29 +1298,29 @@ REPLACE
 
     --it returns NULL when an argument is specified with NULL value
     SELECT REPLACE('12345abcdeabcde','abcde',NULL);
-    
+
 ::
 
     replace('12345abcdeabcde', 'abcde', null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     --not only the first substring but all substrings into 'ABCDE' are replaced
     SELECT REPLACE('12345abcdeabcde','abcde','ABCDE');
-    
+
 ::
 
     replace('12345abcdeabcde', 'abcde', 'ABCDE')
     ======================
       '12345ABCDEABCDE'
-     
+
 .. code-block:: sql
 
     --it removes all of substrings when replace_string is omitted
     SELECT REPLACE('12345abcdeabcde','abcde');
-    
+
 ::
 
     replace('12345abcdeabcde', 'abcde')
@@ -1328,7 +1328,7 @@ REPLACE
       '12345'
 
 다음은 개행 문자(newline)를 "\\n"으로 출력하도록 하는 예이다.
-    
+
 .. code-block:: sql
 
     -- no_backslash_escapes=yes (default)
@@ -1352,7 +1352,7 @@ REVERSE
 
 .. function:: REVERSE( string )
 
-    **REVERSE** 함수는 문자열 *string*\ 을 역순으로 변환한 후 반환한다. 
+    **REVERSE** 함수는 문자열 *string*\ 을 역순으로 변환한 후 반환한다.
 
     :param string: 입력 문자열을 지정한다. 입력 값이 공백 문자열이면 공백 문자열을 반환하고, **NULL** 이면 **NULL** 을 반환한다.
     :rtype: STRING
@@ -1360,7 +1360,7 @@ REVERSE
 .. code-block:: sql
 
     SELECT REVERSE('CUBRID');
-    
+
 ::
 
      reverse('CUBRID')
@@ -1381,19 +1381,19 @@ RIGHT
 .. code-block:: sql
 
     SELECT RIGHT('CUBRID', 3);
-    
+
 ::
 
      right('CUBRID', 3)
     ======================
       'RID'
-     
+
 .. code-block:: sql
 
     SELECT RIGHT ('CUBRID', 10);
 
 ::
-    
+
      right('CUBRID', 10)
     ======================
       'CUBRID'
@@ -1401,7 +1401,7 @@ RIGHT
 RPAD
 ====
 
-.. function:: RPAD( char1, n, [, char2 ] ) 
+.. function:: RPAD( char1, n, [, char2 ] )
 
     **RPAD** 함수는 문자열이 일정 길이가 될 때까지 오른쪽에 특정 문자를 덧붙인다.
 
@@ -1417,65 +1417,65 @@ RPAD
 .. code-block:: sql
 
     --character set is UTF-8 for Korean characters
-     
+
     --it returns only 3 characters if not enough length is specified
     SELECT RPAD ('CUBRID', 3, '?');
-    
+
 ::
 
      rpad('CUBRID', 3, '?')
     ======================
       'CUB'
-     
+
 .. code-block:: sql
 
     --on multi-byte charset, it returns the first character only with a right-padded space
     SELECT RPAD ('큐브리드', 3, '?');
-    
+
 ::
 
      rpad('큐브리드', 3, '?')
     ======================
       '큐브리'
-     
+
 .. code-block:: sql
 
     --padding spaces on the right till char_length is 10
     SELECT RPAD ('CUBRID', 10);
-    
+
 ::
 
      rpad('CUBRID', 10)
     ======================
       'CUBRID    '
-     
+
 .. code-block:: sql
 
     --padding specific characters on the right till char_length is 10
     SELECT RPAD ('CUBRID', 10, '?');
-    
+
 ::
 
      rpad('CUBRID', 10, '?')
     ======================
       'CUBRID????'
-     
+
 .. code-block:: sql
 
     --padding specific characters on the right till char_length is 10
     SELECT RPAD ('큐브리드', 10, '?');
-    
+
 ::
 
      rpad('큐브리드', 10, '?')
     ======================
       '큐브리드??????'
-     
+
 .. code-block:: sql
 
     --padding 4 characters on the right
     SELECT RPAD ('큐브리드', LENGTH('큐브리드')+4, '?');
-    
+
 ::
 
      rpad('',  char_length('')+4, '?')
@@ -1496,29 +1496,29 @@ RTRIM
 .. code-block:: sql
 
     SELECT RTRIM ('     Olympic     ');
-    
+
 ::
 
      rtrim('     Olympic     ')
     ======================
       '     Olympic'
-     
+
 .. code-block:: sql
 
     --If NULL is specified, it returns NULL
     SELECT RTRIM ('iiiiiOlympiciiiii', NULL);
-    
+
 ::
 
      rtrim('iiiiiOlympiciiiii', null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     -- trimming specific strings on the right
     SELECT RTRIM ('iiiiiOlympiciiiii', 'i');
-    
+
 ::
 
      rtrim('iiiiiOlympiciiiii', 'i')
@@ -1538,48 +1538,48 @@ SPACE
 .. code-block:: sql
 
     SELECT SPACE(8);
-    
+
 ::
 
        space(8)
     ======================
       '        '
-     
+
 .. code-block:: sql
 
     SELECT LENGTH(space(1048576));
-    
+
 ::
 
        char_length( space(1048576))
     ===============================
                             1048576
-     
+
 .. code-block:: sql
 
     SELECT LENGTH(space(1048577));
-    
+
 ::
 
        char_length( space(1048577))
     ===============================
                                NULL
-     
+
 .. code-block:: sql
 
     -- string_max_size_bytes=33554432
     SELECT LENGTH(space('33554432'));
-    
+
 ::
 
        char_length( space('33554432'))
     ==================================
                               33554432
-     
+
 .. code-block:: sql
 
     SELECT SPACE('aaa');
-     
+
 ::
 
     ERROR: Cannot coerce 'aaa' to type bigint.
@@ -1613,38 +1613,38 @@ STRCMP
 
 .. note::
 
-    9.0 미만 버전까지는 STRCMP가 대소문자를 구분하지 않고 문자열을 비교했으나, 
+    9.0 미만 버전까지는 STRCMP가 대소문자를 구분하지 않고 문자열을 비교했으나,
     9.0 버전부터는 대소문자를 구분하여 문자열을 비교한다. 대소문자를 구분하지 않게 동작하려면 문자열에 대소문자를 구분하지 않는 콜레이션(예: utf8_en_ci)을 지정한다.
-    
+
     .. code-block:: sql
-    
+
         -- In previous version of 9.0 STRCMP works case-insensitively
         SELECT STRCMP ('ABC','abc');
-        
+
     ::
-        
+
         0
-        
+
     .. code-block:: sql
-    
+
         -- From 9.0 version, STRCMP distinguish the uppercase and the lowercase when the collation is case-sensitive.
         -- charset is en_US.iso88591
-        
+
         SELECT STRCMP ('ABC','abc');
-        
+
     ::
-    
+
         -1
-        
+
     .. code-block:: sql
-    
+
         -- If the collation is case-insensitive, it does not distinguish the uppercase and the lowercase.
         -- charset is en_US.iso88591
 
         SELECT STRCMP ('ABC' COLLATE utf8_en_ci ,'abc' COLLATE utf8_en_ci);
-        
+
     ::
-    
+
         0
 
 SUBSTR
@@ -1655,7 +1655,7 @@ SUBSTR
     **SUBSTR** 함수는 문자열 *string* 내의 *position* 위치로부터 *substring_length* 길이의 문자열을 추출하여 반환한다. 만약, *position* 값으로 음수가 지정되면, 문자열의 끝에서부터 역방향으로 위치를 산정한다. 또한, *substring_length* 가 생략되는 경우, 주어진 *position* 위치로부터 마지막까지 문자열을 추출하여 반환한다.
 
     .. note::
-    
+
         CUBRID 9.0 미만 버전에서는 문자 단위가 아닌 바이트 단위로 시작 위치와 문자열의 길이를 산정한다는 점에 주의한다. 따라서, 멀티바이트 문자셋에서는 한 문자를 표현하는 바이트 수를 고려하여 인자를 지정해야 한다.
 
     :param string: 입력 문자열을 지정한다. 입력 값이 **NULL** 이면 결과로 **NULL** 이 반환된다.
@@ -1666,43 +1666,43 @@ SUBSTR
 .. code-block:: sql
 
     --character set is UTF-8 for Korean characters
-     
+
     --it returns empty string when substring_length is 0
     SELECT SUBSTR('12345abcdeabcde',6, 0);
-    
+
 ::
 
      substr('12345abcdeabcde', 6, 0)
     ======================
       ''
-     
+
 .. code-block:: sql
 
     --it returns 4-length substrings counting from the position
     SELECT SUBSTR('12345abcdeabcde', 6, 4), SUBSTR('12345abcdeabcde', -6, 4);
-    
+
 ::
 
      substr('12345abcdeabcde', 6, 4)   substr('12345abcdeabcde', -6, 4)
     ============================================
       'abcd'                'eabc'
-     
+
 .. code-block:: sql
 
     --it returns substrings counting from the position to the end
     SELECT SUBSTR('12345abcdeabcde', 6), SUBSTR('12345abcdeabcde', -6);
-    
+
 ::
 
      substr('12345abcdeabcde', 6)   substr('12345abcdeabcde', -6)
     ============================================
       'abcdeabcde'          'eabcde'
-     
+
 .. code-block:: sql
 
     -- it returns 4-length substrings counting from 11th position
     SELECT SUBSTR ('12345가나다라마가나다라마', 11 , 4);
-    
+
 ::
 
      substr('12345가나다라마가나다라마', 11 , 4)
@@ -1712,7 +1712,7 @@ SUBSTR
 SUBSTRING
 =========
 
-.. function:: SUBSTRING ( string, position [, substring_length]), 
+.. function:: SUBSTRING ( string, position [, substring_length]),
 .. function:: SUBSTRING ( string FROM position [FOR substring_length] )
 
     **SUBSTRING** 함수는 **SUBSTR** 함수와 유사하며, 문자열 *string* 내의 *position* 위치로부터 *substring_length* 길이의 문자열을 추출하여 반환한다. *position* 값에 음수가 지정되면, **SUBSTRING** 함수는 문자열의 처음으로 검색 위치를 산정하고, **SUBSTR** 함수는 문자열의 끝에서부터 역방향으로 위치를 산정한다. *substring_length* 값에 음수가 지정되면, **SUBSTRING** 함수는 해당 인자가 생략된 것으로 처리하지만, **SUBSTR** 함수는 **NULL** 을 반환한다.
@@ -1725,27 +1725,27 @@ SUBSTRING
 .. code-block:: sql
 
     SELECT SUBSTRING('12345abcdeabcde', -6 ,4), SUBSTR('12345abcdeabcde', -6 ,4);
-    
+
 ::
 
       substring('12345abcdeabcde' from -6 for 4)   substr('12345abcdeabcde', -6, 4)
     ============================================
       '1234'                'eabc'
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING('12345abcdeabcde', 16), SUBSTR('12345abcdeabcde', 16);
-    
+
 ::
 
       substring('12345abcdeabcde' from 16)   substr('12345abcdeabcde', 16)
     ============================================
       ''                    NULL
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING('12345abcdeabcde', 6, -4), SUBSTR('12345abcdeabcde', 6, -4);
-    
+
 ::
 
       substring('12345abcdeabcde' from 6 for -4)   substr('12345abcdeabcde', 6, -4)
@@ -1767,80 +1767,80 @@ SUBSTRING_INDEX
 .. code-block:: sql
 
     SELECT SUBSTRING_INDEX('www.cubrid.org','.','2');
-    
+
 ::
 
       substring_index('www.cubrid.org', '.', '2')
     ======================
       'www.cubrid'
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING_INDEX('www.cubrid.org','.','2.3');
-    
+
 ::
 
       substring_index('www.cubrid.org', '.', '2.3')
     ======================
       'www.cubrid'
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING_INDEX('www.cubrid.org',':','2.3');
-    
+
 ::
 
       substring_index('www.cubrid.org', ':', '2.3')
     ======================
       'www.cubrid.org'
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING_INDEX('www.cubrid.org','cubrid',1);
-    
+
 ::
 
       substring_index('www.cubrid.org', 'cubrid', 1)
     ======================
       'www.'
-     
+
 .. code-block:: sql
 
     SELECT SUBSTRING_INDEX('www.cubrid.org','.',100);
-    
+
 ::
 
       substring_index('www.cubrid.org', '.', 100)
     ======================
       'www.cubrid.org'
 
-TO_BASE64 
+TO_BASE64
 =========
 
-.. function:: TO_BASE64(str) 
+.. function:: TO_BASE64(str)
 
-    문자열을 base-64 암호화 형식으로 변환하여 결과를 반환한다. 입력 인자가 문자열이 아니면 변환이 발생하기 전에 문자열로 변환된다. 입력 인자가 **NULL**\이면 **NULL**\을 반환한다. Base-64로 암호화된 문자열은 :func:`FROM_BASE64` 함수로 복호화될 수 있다. 
-     
-    :param str: 입력 문자열 
-    :rtype: STRING 
+    문자열을 base-64 암호화 형식으로 변환하여 결과를 반환한다. 입력 인자가 문자열이 아니면 변환이 발생하기 전에 문자열로 변환된다. 입력 인자가 **NULL**\이면 **NULL**\을 반환한다. Base-64로 암호화된 문자열은 :func:`FROM_BASE64` 함수로 복호화될 수 있다.
 
-.. code-block:: sql 
+    :param str: 입력 문자열
+    :rtype: STRING
 
-    SELECT TO_BASE64('abcd'), FROM_BASE64(TO_BASE64('abcd')); 
-     
-:: 
+.. code-block:: sql
 
-       to_base64('abcd') from_base64( to_base64('abcd')) 
-    ============================================ 
-      'YWJjZA==' 'abcd' 
+    SELECT TO_BASE64('abcd'), FROM_BASE64(TO_BASE64('abcd'));
 
-다음은 :func:`TO_BASE64` 함수와 :func:`FROM_BASE64` 함수에서 사용되는 암호화 및 복호화 규칙이다. 
+::
 
-*   알파벳 값 62에 대한 암호화는 '+'이다. 
-*   알파벳 값 63에 대한 암호화는 '/'이다. 
-*   암호화된 결과는 4개의 출력 가능한 문자 그룹으로 구성되어 있다. 입력 데이터의 세 바이트는 네 개의 문자로 암호화된다. 마지막 그룹이 네 개의 문자로 채워지지 않으면 '=' 문자를 덧붙여(padding) 네 개 문자의 길이를 만든다. 
-*   긴 출력을 여러 개의 라인으로 나누기 위해 76개의 암호화된 출력 문자마다 뉴라인(newline)이 추가된다. 
-*   복호화는 뉴 라인(newline), 캐리지 리턴(carriage return), 탭, 공백 문자를 인식하고 이들을 무시한다. 
+       to_base64('abcd') from_base64( to_base64('abcd'))
+    ============================================
+      'YWJjZA==' 'abcd'
+
+다음은 :func:`TO_BASE64` 함수와 :func:`FROM_BASE64` 함수에서 사용되는 암호화 및 복호화 규칙이다.
+
+*   알파벳 값 62에 대한 암호화는 '+'이다.
+*   알파벳 값 63에 대한 암호화는 '/'이다.
+*   암호화된 결과는 4개의 출력 가능한 문자 그룹으로 구성되어 있다. 입력 데이터의 세 바이트는 네 개의 문자로 암호화된다. 마지막 그룹이 네 개의 문자로 채워지지 않으면 '=' 문자를 덧붙여(padding) 네 개 문자의 길이를 만든다.
+*   긴 출력을 여러 개의 라인으로 나누기 위해 76개의 암호화된 출력 문자마다 뉴라인(newline)이 추가된다.
+*   복호화는 뉴 라인(newline), 캐리지 리턴(carriage return), 탭, 공백 문자를 인식하고 이들을 무시한다.
 
 .. seealso::
 
@@ -1864,49 +1864,49 @@ TRANSLATE
     SELECT TRANSLATE('12345abcdeabcde','abcde', NULL);
 
 ::
-    
+
       translate('12345abcdeabcde', 'abcde', null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     --it translates 'a','b','c','d','e' into '1', '2', '3', '4', '5' respectively
     SELECT TRANSLATE('12345abcdeabcde', 'abcde', '12345');
-    
+
 ::
 
       translate('12345abcdeabcde', 'abcde', '12345')
     ======================
       '123451234512345'
-     
+
 .. code-block:: sql
 
     --it translates 'a','b','c' into '1', '2', '3' respectively and removes 'd's and 'e's
     SELECT TRANSLATE('12345abcdeabcde','abcde', '123');
-    
+
 ::
 
       translate('12345abcdeabcde', 'abcde', '123')
     ======================
       '12345123123'
-     
+
 .. code-block:: sql
 
     --it removes 'a's,'b's,'c's,'d's, and 'e's in the string
     SELECT TRANSLATE('12345abcdeabcde','abcde', '');
-    
+
 ::
 
       translate('12345abcdeabcde', 'abcde', '')
     ======================
       '12345'
-     
+
 .. code-block:: sql
 
     --it only translates 'a','b','c' into '3', '4', '5' respectively
     SELECT TRANSLATE('12345abcdeabcde','ABabc', '12345');
-    
+
 ::
 
       translate('12345abcdeabcde', 'ABabc', '12345')
@@ -1932,51 +1932,51 @@ TRIM
 
     --trimming NULL returns NULL
     SELECT TRIM (NULL);
-    
+
 ::
 
      trim(both  from null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     --trimming spaces on both leading and trailing parts
     SELECT TRIM ('     Olympic     ');
-    
+
 ::
 
      trim(both  from '     Olympic     ')
     ======================
       'Olympic'
-     
+
 .. code-block:: sql
 
     --trimming specific strings on both leading and trailing parts
     SELECT TRIM ('i' FROM 'iiiiiOlympiciiiii');
-    
+
 ::
 
      trim(both 'i' from 'iiiiiOlympiciiiii')
     ======================
       'Olympic'
-     
+
 .. code-block:: sql
 
     --trimming specific strings on the leading part
     SELECT TRIM (LEADING 'i' FROM 'iiiiiOlympiciiiii');
-    
+
 ::
 
      trim(leading 'i' from 'iiiiiOlympiciiiii')
     ======================
       'Olympiciiiii'
-     
+
 .. code-block:: sql
 
     --trimming specific strings on the trailing part
     SELECT TRIM (TRAILING 'i' FROM 'iiiiiOlympiciiiii');
-    
+
 ::
 
      trim(trailing 'i' from 'iiiiiOlympiciiiii')
@@ -1989,35 +1989,35 @@ UCASE, UPPER
 .. function:: UCASE ( string )
 .. function:: UPPER ( string )
 
-    **UCASE** 함수와 **UPPER** 함수는 동일하며, 문자열에 포함된 소문자를 대문자로 변환한다. 
-    
+    **UCASE** 함수와 **UPPER** 함수는 동일하며, 문자열에 포함된 소문자를 대문자로 변환한다.
+
     :param string: 대문자로 변환할 문자열을 지정한다. 값이 **NULL** 이면 결과는 **NULL** 이 반환된다.
     :rtype: STRING
 
 .. code-block:: sql
 
     SELECT UPPER('');
-    
+
 ::
 
      upper('')
     ======================
       ''
-     
+
 .. code-block:: sql
 
     SELECT UPPER(NULL);
-    
+
 ::
 
      upper(null)
     ======================
       NULL
-     
+
 .. code-block:: sql
 
     SELECT UPPER('Cubrid');
-    
+
 ::
 
      upper('Cubrid')
@@ -2029,10 +2029,10 @@ UCASE, UPPER
 콜레이션이 utf8_bin이면 변환이 되지 않는다.
 
 .. code-block:: sql
-    
+
     SET NAMES utf8 COLLATE utf8_bin;
     SELECT UPPER('ă');
-    
+
        upper(_utf8'ă')
     ======================
       'ă'
@@ -2043,7 +2043,7 @@ UCASE, UPPER
 
     SET NAMES utf8 COLLATE utf8_ro_cs;
     SELECT UPPER('ă');
-    
+
        upper(_utf8'ă' COLLATE utf8_ro_cs)
     ======================
       'Ă'

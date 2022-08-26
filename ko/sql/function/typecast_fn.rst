@@ -217,7 +217,7 @@ CUBRID에서 **CAST** 연산자를 사용한 명시적인 타입 변환에 대�
      
 .. code-block:: sql
 
-    SELECT CAST('1A' AS BLOB);
+    SELECT CAST('1A' AS bit(16));
     
 ::
 

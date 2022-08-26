@@ -1056,12 +1056,12 @@ MAKETIME
 
 .. function:: MAKETIME(hour, min, sec)
 
-    **MAKETIME** 함수는 지정된 인자로부터 시간을 AM/PM 형태로 반환한다. 인자로 시각, 분, 초에 해당하는 **INTEGER** 타입의 값을 지정할 수 있으며, **DATETIME** 타입의 값을 반환한다.
+    **MAKETIME** 함수는 지정된 인자로부터 시간을 AM/PM 형태로 반환한다. 인자로 시각, 분, 초에 해당하는 **INTEGER** 타입의 값을 지정할 수 있으며, **TIME** 타입의 값을 반환한다.
 
     :param hour: 시를 나타내는 0~23 범위의 정수
     :param min: 분을 나타내는 0~59 범위의 정수
     :param sec: 초를 나타내는 0~59 범위의 정수
-    :rtype: DATETIME
+    :rtype: TIME
 
 .. code-block:: sql
 
@@ -1963,7 +1963,7 @@ TO_DAYS
 
 .. function:: TO_DAYS (date)
 
-    **TO_DAYS** 함수는 지정된 인자로부터 0년 이후의 날 수를 366~3652424 범위의 값으로 반환한다. 인자로 **DATE** 타입의 값을 지정할 수 있으며, **INTEGER** 타입의 값을 반환한다.
+    **TO_DAYS** 함수는 지정된 인자로부터 기원전 1년 1월 1일 이후의 날 수를 366~3652424 범위의 값으로 반환한다. 인자로 **DATE** 타입의 값을 지정할 수 있으며, **INTEGER** 타입의 값을 반환한다.
 
     **TO_DAYS** 함수는 그레고리력(Gregorian Calendar) 출현(1582년)보다 앞의 날짜는 고려하지 않았으므로, 1582년보다 앞의 날짜에 대해서는 사용하지 않는 것을 권장한다.
 

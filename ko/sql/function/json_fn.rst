@@ -343,7 +343,7 @@ JSON_UNQUOTE
 
 .. code-block:: sql
 
-    SELECT JSON_UNQUOTE ('"\\u0032"');
+    SELECT JSON_UNQUOTE ('"\u0032"');
 
 ::
 
@@ -353,7 +353,7 @@ JSON_UNQUOTE
 
 .. code-block:: sql
 
-    SELECT JSON_UNQUOTE ('"\\""');
+    SELECT JSON_UNQUOTE ('"\""');
 
 ::
 
