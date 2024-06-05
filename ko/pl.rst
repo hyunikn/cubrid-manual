@@ -11,7 +11,7 @@ Overview
 
 PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 다음 문법을 따르는 CREATE PROCEDURE 문과 CREATE FUNCTION 문의 AS (또는 IS) 키워드 뒤에 PL/CSQL 코드를 써서
-현재 생성하고 있는 저장 프로시저/함수의 동작을 기술한다.
+생성하고자 하는 저장 프로시저/함수의 동작을 기술한다.
 
 ::
 
@@ -22,7 +22,7 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
         CREATE [ OR REPLACE ] FUNCTION <identifier> [ ( <seq_of_parameters> ) ] RETURN <type_spec>
         { IS | AS } [ LANGUAGE PLCSQL ] [ <seq_of_declare_specs> ] <body> ;
 
-위 문법에서 프로시저나 함수의 *body*\는 PL/CSQL 실행문들을 포함하고
+위 문법에서 저장 프로시저/함수의 *body*\는 PL/CSQL 실행문들을 포함하고
 그 앞의 선언부 *seq_of_declare_specs*\는 실행문들 안에서 사용될 변수, 상수, Exception 등을 선언한다.
 이들 문법 요소에 대한 자세한 내용은 :ref:`선언문 <decl>`\과 :ref:`실행문 <stmt>` 절을 참고한다.
 
@@ -33,7 +33,7 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 그 저장 프로시저/함수가 Autonomous Transaction으로 설정되어 있는가 아닌가에 따라 달라진다.
 관련 내용은 :ref:`Autonomous Transaction 선언 <auto_tran>`\을 참고한다.
 
-다음은 PL/CSQL을 사용해서 작성한 프로시저와 함수의 예이다.
+다음은 PL/CSQL을 사용해서 작성한 저장 프로시저/함수의 예이다.
 
 .. code-block:: sql
 
@@ -102,7 +102,7 @@ Static SQL
 SQL 구문 중에 다음에 해당하는 것들을 PL/CSQL 실행문으로 직접 사용할 수 있으며,
 그러한 경우를 Static SQL 문이라고 부른다.
 
-* SELECT
+* SELECT (CTE, UNION, INTERSECT, MINUS 포함)
 * INSERT, UPDATE, DELETE, MERGE, REPLACE
 * COMMIT, ROLLBACK
 * TRUNCATE
@@ -110,7 +110,7 @@ SQL 구문 중에 다음에 해당하는 것들을 PL/CSQL 실행문으로 직�
 위 목록에 포함되지 않는 다른 SQL 문들은 직접 사용할 수는 없으나,
 아래에서 설명하는 Dynamic SQL 문을 써서 실행할 수 있다.
 
-SELECT 문은 실행문으로 사용될 뿐만 아니라 커서를 선언할 때나 커서 변수를 OPEN 할 때도 사용된다.
+SELECT 문은 실행문으로 사용될 뿐만 아니라 커서를 선언할 때나 OPEN-FOR 문에도 사용된다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
 프로그램에서 선언한 변수나 프로시저/함수 파라미터를 쓸 수 있다.
@@ -223,9 +223,8 @@ Static/Dynamic SQL 밖의 PL/CSQL 문 작성 규칙도 대체로 같은 규칙�
     [a@b]           // [ ]로 둘러싸더라도 특수문자 불가
     select          // 예약어
 
-PL/CSQL의 예약어는 기존의 `SQL의 예약어 <https://www.cubrid.org/manual/ko/11.2/sql/keyword.html#id1>`_\에
-아래 표에 나열한 내용을 추가한 단어들이다.
-Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, 상수, Exception, 내부 프로시저, 내부 함수
+PL/CSQL의 예약어는 아래 표에 나열되어 있다.
+Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, 상수, Exception, 내부 프로시저/함수
 등의 이름을 나타내는 식별자로 쓸 수 없다.
 단, SQL 문에서처럼 큰따옴표(" "), 대괄호([ ]), 백틱(\` \`)으로 감싸면 식별자로 쓸 수 있다.
 
@@ -291,6 +290,8 @@ SQL에서 제공하는 데이터 타입 중 일부와 BOOLEAN, SYS_REFCURSOR이�
   BOOLEAN을 사용할 수 있다.
 * SYS_REFCURSOR: 커서 변수를 선언할 때 사용한다.
   커서 변수의 용도는 :ref:`OPEN-FOR <cursor_manipulation>` 문을 참고한다.
+  BOOLEAN과 마찬가지로 CREATE PROCEDURE/FUNCTION 문에서 파라미터 타입이나 리턴 타입으로 SYS_REFCURSOR를 사용할 수 없고,
+  :ref:`내부 프로시저/함수 <local_routine_decl>`\에는 사용할 수 있다.
 
 SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
 
@@ -412,8 +413,6 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 +---------------------+------------------------------------------------------------------+
 | INVALID_CURSOR      | 허용되지 않는 커서 조작 (예: 열려 있지 않은 커서를 닫으려고 함)  |
 +---------------------+------------------------------------------------------------------+
-| LOGIN_DENIED        | 유효하지 않는 사용자 이름이나 암호로 DBMS에 로그인 시도          |
-+---------------------+------------------------------------------------------------------+
 | NO_DATA_FOUND       | SELECT INTO 문 실행 결과 0개의 Row가 반환됨                      |
 +---------------------+------------------------------------------------------------------+
 | PROGRAM_ERROR       | 시스템 내부 에러                                                 |
@@ -472,7 +471,7 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
 선언문
 ******************
 
-프로시저나 함수 선언문, 그리고 Block 실행문에는 선언부 *seq_of_declare_specs*\가 존재한다.
+프로시저/함수 선언문, 그리고 Block 실행문에는 선언부 *seq_of_declare_specs*\가 존재한다.
 선언부에서는 아래 문법에서 정의하는 바와 같이 변수, 상수, Exception, 커서,
 내부 프로시저/함수, Autonomous Transaction 여부를 선언할 수 있다.
 선언된 각 항목들은 선언부를 뒤따르는 *body* 안에서 참조할 수 있다.
@@ -689,8 +688,8 @@ Exception 선언
 내부 프로시저/함수 선언
 ========================
 
-정의 중인 스토어드 프로시저/함수 안에서만 사용할 내부 프로시저/함수를 다음 문법에 따라 정의할 수 있다.
-어느 정도 규모를 이루거나 두 번 이상 반복되는 연관된 실행 과정을 내부 프로시저나 함수로 묶어 모듈화하면
+정의 중인 저장 프로시저/함수 안에서만 사용할 내부 프로시저/함수를 다음 문법에 따라 정의할 수 있다.
+어느 정도 규모를 이루거나 두 번 이상 반복되는 연관된 실행 과정을 내부 프로시저/함수로 묶어 모듈화하면
 프로그램 가독성이 높아지고 유지 보수에 도움이 된다.
 
 ::
@@ -700,7 +699,7 @@ Exception 선언
     <inner_function_decl> ::=
         FUNCTION <identifier> [ ( <seq_of_parameters> ) ] RETURN <type_spec> { IS | AS } [ <seq_of_declare_specs> ] <body> ;
 
-    <seq_of_parameters> ::= <parameter> [, <parameter> ...]
+    <seq_of_parameters> ::= [ <parameter> [, <parameter> ...] ]
     <parameter> ::= <identifier> [ { IN | IN OUT | INOUT | OUT } ] <type_spec>
     <type_spec> ::=
           <builtin_type>
@@ -716,7 +715,7 @@ Exception 선언
 * *parameter*: 파라미터는 IN, IN OUT, INOUT, OUT 네 가지 경우로 선언할 수 있다.
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
-* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저, 내부 함수 선언 중 하나
+* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저/함수 선언 중 하나
 * *statement*: 아래 :ref:`실행문 <stmt>` 절 참조
 * *handler*: 지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
 * *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.  OTHERS가 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
@@ -725,7 +724,7 @@ Exception 선언
 함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하면 에러가 발생한다.
 프로시저의 RETURN 문에 반환값을 지정하면 에러이다.
 
-(내부) 프로시저/함수를 선언하면 자기 자신을 실행부에서 참조할 수 있다. 즉, 재귀 호출이 가능하다.
+프로시저/함수를 선언하면 자기 자신을 실행부에서 참조할 수 있다. 즉, 재귀 호출이 가능하다.
 
 .. code-block:: sql
 
@@ -795,13 +794,13 @@ Autonomous Transaction 선언
     <autonomous_transaction_decl> ::=
         PRAGMA AUTONOMOUS_TRANSACTION ;
 
-이 선언문을 포함한 스토어드 프로시저/함수는 호출한 쪽의 트랜잭션에 포함되는 것이 아니라,
+이 선언문을 포함한 저장 프로시저/함수는 호출한 쪽의 트랜잭션에 포함되는 것이 아니라,
 독자적인 자신만의 트랜잭션 안에서 실행된다.
-이 경우에 스토어드 프로시저/함수 실행 도중에 DB 변경이 있었는데도 COMMIT이나 ROLLBACK이 실행되지 않으면 에러이다.
+이 경우에 저장 프로시저/함수 실행 도중에 DB 변경이 있었는데도 COMMIT이나 ROLLBACK이 실행되지 않으면 에러이다.
 그리고, COMMIT이나 ROLLBACK을 실행해도 호출한 쪽의 트랜잭션의 진행에는 영향을 미치지 않는다.
 
-Autonomous Transaction으로 선언되지 않은 스토어드 프로시저/함수는 호출한 쪽의 트랜잭션 안에 포함된다.
-이 경우에는 스토어드 프로시저/함수 안에서 호출한 COMMIT이나 ROLLBACK은 호출한 쪽의 트랜잭션에 대해서 동작한다.
+Autonomous Transaction으로 선언되지 않은 저장 프로시저/함수는 호출한 쪽의 트랜잭션 안에 포함된다.
+이 경우에는 저장 프로시저/함수 안에서 호출한 COMMIT이나 ROLLBACK은 호출한 쪽의 트랜잭션에 대해서 동작한다.
 
 이 선언문은 최상위 선언부에서만 사용할 수 있다.
 즉, 내부 프로시저/함수나 BLOCK 실행문의 선언부에서는 사용할 수 없다.
@@ -851,7 +850,7 @@ BLOCK은 프로시저/함수와 마찬가지로 예외처리 구조를 가질 �
 
 
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
-* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저, 내부 함수 선언. (참조: :ref:`선언문 <decl>`)
+* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저/함수 선언. (참조: :ref:`선언문 <decl>`)
 * *handler*:  지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
 * *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치된다. 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
 
@@ -908,11 +907,11 @@ COMMIT, ROLLBACK, TRUNCATE 문은 프로그램의 실행문으로서 직접 사�
 
     <open_for_statement> ::= OPEN <identifier> FOR <select_statement>
 
-* *cursor_expression*: 계산 결과로 커서나 커서 변수를 갖는 표현식
+* *cursor_expression*: 계산 결과로 커서나 SYS_REFCURSOR 변수를 갖는 표현식
 * *open_statement*: 커서를 연다. 파라미터를 갖도록 선언된 커서에 대해서는 선언된 파라미터 갯수와 타입에 맞는 인자를 주면서 열어야 한다.
 * *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 파라미터에 대입한다. row 안의 컬럼 갯수는 지정된 변수나 OUT 파라미터 갯수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
 * *close_statement*: 커서를 닫는다.
-* *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 커서 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 커서 변수에 할당한다.
+* *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다.
 
 다음은 OPEN, FETCH, CLOSE 문의 사용예이다.
 
@@ -1358,7 +1357,7 @@ SQL%ROWCOUNT는 Static SQL을 실행한 직후에 결과 크기를 나타내는 
 커서 속성
 =================
 
-커서나 커서 변수를 계산 결과로 갖는 표현식 *cursor_expression*\에
+커서나 SYS_REFCURSOR 변수를 계산 결과로 갖는 표현식 *cursor_expression*\에
 %ISOPEN, %FOUND, %NOTFOUND, %ROWCOUNT 기호를 덧붙여 그 커서의 네 가지 속성을 조회할 수 있다.
 
 * %ISOPEN: 커서가 열려 있는지 여부 (BOOLEAN)
