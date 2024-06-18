@@ -31,9 +31,6 @@ CUBRID SQL
 
 *   트리거(trigger): 특정 질의 수행 시 특정 기능이 같이 수행되도록 하는 트리거의 생성, 변경, 삭제 방법을 설명한다.
 
-*   Java 저장 함수/프로시저: Java 메서드를 별도로 생성하여 질의문 내에서 호출할 수 있는 방법을 설명한다.
-
-*   메서드(method): CUBRID 데이터베이스 시스템의 내장 함수인 메서드에 대해 설명한다.
 
 *   클래스 상속: 부모와 자식 테이블(클래스) 사이에 속성을 상속하는 방법을 설명한다.
 
@@ -56,9 +53,7 @@ CUBRID SQL
     i18n_index.rst
     transaction_index.rst
     trigger.rst
-    jsp.rst
     dblink.rst
-    method.rst
     oodb.rst
     db_admin.rst
     user_schema.rst
