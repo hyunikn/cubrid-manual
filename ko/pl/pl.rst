@@ -29,10 +29,6 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 저장 프로시저/함수는 Auto Commit 기능이 언제나 비활성화 된 상태로 실행된다.
 이는 호출한 세션에서 Auto Commit 기능이 활성화 되어 있어도 마찬가지이다.
 
-저장 프로시저/함수 안에서 실행되는 COMMIT, ROLLBACK 문의 의미는
-그 저장 프로시저/함수가 Autonomous Transaction으로 설정되어 있는가 아닌가에 따라 달라진다.
-관련 내용은 :ref:`Autonomous Transaction 선언 <auto_tran>`\을 참고한다.
-
 다음은 PL/CSQL을 사용해서 작성한 저장 프로시저/함수의 예이다.
 
 .. code-block:: sql
@@ -43,7 +39,6 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
         p_nation_code VARCHAR,
         p_event VARCHAR)
     AS
-        PRAGMA AUTONOMOUS_TRANSACTION;
     BEGIN
         INSERT INTO athlete (name, gender, nation_code, event)
         VALUES (p_name, p_gender, p_nation_code, p_event);
@@ -110,11 +105,14 @@ SQL 구문 중에 다음에 해당하는 것들을 PL/CSQL 실행문으로 직�
 위 목록에 포함되지 않는 다른 SQL 문들은 직접 사용할 수는 없으나,
 아래에서 설명하는 Dynamic SQL 문을 써서 실행할 수 있다.
 
-SELECT 문은 실행문으로 사용될 뿐만 아니라 커서를 선언할 때나 OPEN-FOR 문에도 사용된다.
+SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_decl>`\를 선언할 때나 :ref:`OPEN-FOR <cursor_manipulation>` 문에도 사용된다.
+
+SELECT 문의 INTO 절에 프로그램의 변수나 OUT 파라미터를 써서 조회 결과를 담을 수 있다.
+SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
+SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
 프로그램에서 선언한 변수나 프로시저/함수 파라미터를 쓸 수 있다.
-그리고, SELECT 문의 INTO 절에 프로그램의 변수나 OUT 파라미터를 써서 조회 결과를 담을 수 있다.
 
 SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중
 `CUBRID SQL <https://www.cubrid.org/manual/ko/11.2/sql/index.html>`_\을 참고하도록 한다.
@@ -200,9 +198,8 @@ Static/Dynamic SQL 밖의 PL/CSQL 문 작성 규칙도 대체로 같은 규칙�
 * SQL과 달리 식별자에 '#'을 쓸 수 없다. 즉, 식별자는 영문 대소문자, 한글, 숫자, '_'(underscore)로만 이루어져야 한다.
 * 큰따옴표, 대괄호, 백틱 부호로 둘러싸더라도 식별자에 특수 문자를 쓸 수 없다.
   영문 대소문자, 한글, 숫자, '_'(underscore)만 사용 가능하다.
-* no_backslash_escapes 설정 파라미터 값과 관계 없이 backslash 문자는 escape 문자로 사용되지 않는다.
-* oracle_style_empty_string 설정 파라미터 값과 관계 없이 빈 문자열을 NULL과 동일시하지 않는다.
-* 비트열 리터럴을 사용할 수 없다. Static/Dynamic SQL 밖의 PL/CSQL 문에서는 비트열 타입을 지원하지 않는다.
+* no_backslash_escapes 설정 파라미터 값과 상관없이 backslash 문자는 escape 문자로 사용되지 않는다.
+* 비트열 리터럴을 사용할 수 없다.
 
 .. rubric:: 허용되는 식별자의 예
 
@@ -268,6 +265,8 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 |   XOR                                                                                 |
 +---------------------------------------------------------------------------------------+
 
+위에서 AUTONOMOUS_TRANSACTION 은 향후 추가할 기능을 위해서 미리 포함되어 있는 예약어이고 현재는 사용되지 않는다.
+
 ..
     (TODO) examples on comments and literals
 ..
@@ -293,7 +292,7 @@ SQL에서 제공하는 데이터 타입 중 일부와 BOOLEAN, SYS_REFCURSOR이�
   BOOLEAN과 마찬가지로 CREATE PROCEDURE/FUNCTION 문에서 파라미터 타입이나 리턴 타입으로 SYS_REFCURSOR를 사용할 수 없고,
   :ref:`내부 프로시저/함수 <local_routine_decl>`\에는 사용할 수 있다.
 
-SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
+SQL에서 제공하는 데이터 타입 중 Static/Dynamic SQL 밖의 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
 
 +----------------+-------------------------------------+----------------------------------+
 | 유형           | 지원                                | 미지원                           |
@@ -326,19 +325,14 @@ SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 �
 |                |                                     | JSON                             |
 +----------------+-------------------------------------+----------------------------------+
 
-Static/Dynamic SQL 밖의 PL/CSQL문에서 문자열 타입 CHAR와 VARCHAR를 사용할 때,
-타 DBMS와의 호환성과 향후 확장성을 위해 길이를 지정하는 CHAR(n), VARCHAR(n) 형태를 문법적으로 지원한다.
-하지만, 현재까지의 구현에서는 프로그램 동작 중에는 길이 지정 부분 '(n)'가 무시된다.
-예를 들어, 아래 예제에서 VARCHAR(40)은 VARCHAR라고 쓴 것과 동일하게 동작한다.
+변수, 상수, 프로시저/함수, 커서를 선언할 때 위 표에서 '지원' 컬럼에 열거된 타입을 쓸 수 있다.
 
-현재, PL/CSQL은 사용자 정의 타입을 지원하지 않는다.
-
-변수, 상수, 프로시저/함수, 커서를 선언할 때 위에서 열거된 지원 타입을 쓸 수 있다.
-혹은, 변수나 테이블 컬럼 이름 뒤에 '%TYPE'을 덧붙여 해당 변수나 컬럼의 선언 타입을 나타낼 수도 있다.
+테이블 컬럼 이름 뒤에 '%TYPE'을 덧붙여 해당 컬럼의 선언 타입을 나타낼 수 있다.
+아래는 %TYPE을 사용하는 예제이다.
 
 .. code-block:: sql
 
-    CREATE OR REPLACE FUNCTION get_athlete_name(p_code INTEGER) RETURN VARCHAR(40)
+    CREATE OR REPLACE FUNCTION get_athlete_name(p_code athlete.code%TYPE) RETURN athlete.name%TYPE
     AS
         name athlete.name%TYPE;
     BEGIN
@@ -350,6 +344,15 @@ Static/Dynamic SQL 밖의 PL/CSQL문에서 문자열 타입 CHAR와 VARCHAR를 �
         RETURN name;
     END;
 
+%TYPE은 CREATE PROCEDURE/FUNTION 문을 실행하는 시점에 해당 테이블 컬럼의 타입을 나타내며,
+나중에 그 컬럼의 타입이 변경되어도 자동으로 저장 프로시저/함수의 동작에 반영되지는 않는다.
+그러므로, %TYPE을 적용한 테이블 컬럼의 타입이 변경되었을 때에는 그 %TYPE을 사용한 저장 프로시저/함수에 대해서 모두
+ALTER PROCEDURE/FUNCTION <name> REBUILD (TODO) 문을 실행해서 재컴파일 해주어야 한다.
+
+테이블 컬럼 뿐만 아니라 프로시저/함수의 인자나 변수 이름 뒤에 %TYPE을 덧붙여 그 인자나 변수의 선언 타입을 나타낼 수 있다.
+
+현재, PL/CSQL은 사용자 정의 타입을 지원하지 않는다.
+
 연산자와 함수
 ==================
 
@@ -359,19 +362,19 @@ Static/Dynamic SQL에서는 SQL에서 제공하는 모든 연산자와 함수를
 `구문/타입 관련 파라미터 <https://www.cubrid.org/manual/ko/11.2/admin/config.html#stmt-type-parameters>`_)
 
 반면, Static/Dynamic SQL 밖의 PL/CSQL 문에서는 SQL에서 제공하는 모든 연산자와 함수를
-대부분 동일하게 쓸 수 있으나 다음의 몇 가지 예외들은 쓸 수 없다.
+대부분 동일하게 쓸 수 있으나 다음 몇 가지 예외가 있다.
 
-* 지원하지 않는 타입(BIT, ENUM, BLOB/CLOB, JSON, 등)의 값을 인자나 결과로 갖는 연산자와 함수
-* 나머지 연산자 %
+* 지원하지 않는 타입(BIT, ENUM, BLOB/CLOB, JSON, 등)의 값을 인자나 결과로 갖는 연산자와 함수는 쓸 수 없음
+* 나머지 연산자 %를 쓸 수 없음
 
   + 단, 동일한 의미의 MOD를 대신 쓸 수 있음
 
-* 논리 연산자 &&, ||, !
+* 논리 연산자 &&, ||, ! 들을 쓸 수 없음
 
   + 단, 각각 동일한 의미의 AND, OR, NOT을 대신 쓸 수 있음
-  + 특히, ||는 서버 설정 파라미터 pipes_as_concat 값이 no일지라도 논리합 연산자로 쓰이지 않음
+  + 특히, ||는 서버 설정 파라미터 pipes_as_concat 값에 상관없이 논리합 연산자로 쓰이지 않음
 
-* 서버 설정 파라미터 plus_as_concat 값이 yes일지라도 +가 문자열 병합 연산자로 쓰이지 않음
+* 서버 설정 파라미터 plus_as_concat 값에 상관없이 +가 숫자 덧셈과 문자열 병합 연산자로 쓰임
 
 다음 예제는 문자열 함수 locate과 substr, 그리고 문자열 병합 연산자 ||를 Static/Dynamic SQL 밖의
 PL/CSQL 실행문에서도 사용할 수 있음을 보여준다.
@@ -457,12 +460,11 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
 
 그러나, Static/Dynamic SQL 밖에서 PL/CSQL 문의 동작은 서버 설정 파라미터 적용에 몇 가지 예외가 있다.
 
-* no_backslash_escapes 설정 파라미터값과 관계 없이 backslash 문자는 escape 문자로 사용되지 않는다.
-* oracle_style_empty_string 설정 파라미터값과 관계 없이 빈 문자열을 NULL과 동일시하지 않는다.
+* no_backslash_escapes 설정 파라미터값과 상관없이 backslash 문자는 escape 문자로 사용되지 않는다.
 * pipes_as_concat 설정 파라미터값과 상관없이 ||는 논리합(OR) 연산자로 사용할 수 없다.
-* plus_as_concat 설정 파라미터값과 상관없이 +는 문자열 병합 연산자로 사용할 수 없다.
+* plus_as_concat 설정 파라미터값과 상관없이 +는 숫자 덧셈과 문자열 병합 연산자로 사용된다.
 
-위 네 가지 파라미터에 대한 자세한 내용은
+위 세 가지 파라미터에 대한 자세한 내용은
 `구문/타입 관련 파라미터 <https://www.cubrid.org/manual/ko/11.2/admin/config.html#stmt-type-parameters>`_\를 참고한다.
 
 .. _decl:
@@ -473,7 +475,7 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
 
 프로시저/함수 선언문, 그리고 Block 실행문에는 선언부 *seq_of_declare_specs*\가 존재한다.
 선언부에서는 아래 문법에서 정의하는 바와 같이 변수, 상수, Exception, 커서,
-내부 프로시저/함수, Autonomous Transaction 여부를 선언할 수 있다.
+내부 프로시저/함수를 선언할 수 있다.
 선언된 각 항목들은 선언부를 뒤따르는 *body* 안에서 참조할 수 있다.
 
 ::
@@ -486,7 +488,6 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
         | <cursor_decl>
         | <inner_procedure_decl>
         | <inner_function_decl>
-        | <autonomous_transaction_decl>
 
 선언 가능한 각 항목에 대한 설명은 아래 내용을 참고한다.
 
@@ -507,7 +508,7 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 
 변수 선언에 선택적으로 NOT NULL 조건과 초기값을 지정할 수 있다.
-NOT NULL 조건이 지정된 경우 반드시 NULL이 아닌 초기값이 함께 지정되어야 한다.
+NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 함께 지정되어야 한다.
 선언할 때 초기값이 지정되지 않은 변수는 암묵적으로 NULL 값을 갖게 된다.
 
 .. code-block:: sql
@@ -524,7 +525,7 @@ NOT NULL 조건이 지정된 경우 반드시 NULL이 아닌 초기값이 함께
 
 내부 프로시저/함수 선언이나 Block 실행문은 자신만의 선언부와 실행부를 가지면서 중첩된 scope을 이룬다.
 안쪽 scope에서 바깥에서 선언한 변수와 동일한 이름의 변수를 선언하면 안쪽에서는 바깥쪽의 동일 이름이 가려진다.
-이러한 "이름 가림"은 다른 종류의 이름(변수, 상수, 프로시저/함수 파라미터, Exception, 커서, 내부 프로시저/함수)들에
+이러한 "이름 가림"은 다른 종류의 이름(상수, 프로시저/함수 파라미터, Exception, 커서, 내부 프로시저/함수)들에
 대해서도 마찬가지로 적용된다.
 중첩된 scope에서 선언된  이름들은 그 scope이 끝나면 사라진다.
 
@@ -690,7 +691,7 @@ Exception 선언
 
 정의 중인 저장 프로시저/함수 안에서만 사용할 내부 프로시저/함수를 다음 문법에 따라 정의할 수 있다.
 어느 정도 규모를 이루거나 두 번 이상 반복되는 연관된 실행 과정을 내부 프로시저/함수로 묶어 모듈화하면
-프로그램 가독성이 높아지고 유지 보수에 도움이 된다.
+프로그램 가독성이 높아지고 동일한 코드가 여러 군데 반복되는 일이 줄어든다.
 
 ::
 
@@ -712,17 +713,17 @@ Exception 선언
     <handler> ::= WHEN <exception_name> [ OR <exeption_name> OR ... ] THEN <seq_of_statements>
     <exception_name> ::= OTHERS | identifier
 
-* *parameter*: 파라미터는 IN, IN OUT, INOUT, OUT 네 가지 경우로 선언할 수 있다.
+* *parameter*: 파라미터는 IN, IN OUT, INOUT, OUT 네 가지 경우로 선언할 수 있다. IN OUT과 INOUT은 동일한 효과를 갖는다.
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
-* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저/함수 선언 중 하나
+* *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언 중 하나
 * *statement*: 아래 :ref:`실행문 <stmt>` 절 참조
 * *handler*: 지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
 * *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.  OTHERS가 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
 
-함수 *body*\에서는 RETURN 절에 지정된 타입에 맞는 값을 반환해야 한다.
-함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하면 에러가 발생한다.
-프로시저의 RETURN 문에 반환값을 지정하면 에러이다.
+함수의 경우에는  *body*\에서 RETURN 절에 지정된 타입에 맞는 값을 반환해야 한다.
+함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하는 실행경로가 존재하면 컴파일 과정에서 에러가 발생한다.
+프로시저의 경우에는 RETURN 문에 반환값을 지정하면 에러이다.
 
 프로시저/함수를 선언하면 자기 자신을 실행부에서 참조할 수 있다. 즉, 재귀 호출이 가능하다.
 
@@ -785,26 +786,6 @@ Exception 선언
 
 재귀 호출을 사용할 때는 무한 루프에 빠지지 않도록 종료 조건을 적절히 주어야 한다.
 
-.. _auto_tran:
-
-Autonomous Transaction 선언
-===========================
-::
-
-    <autonomous_transaction_decl> ::=
-        PRAGMA AUTONOMOUS_TRANSACTION ;
-
-이 선언문을 포함한 저장 프로시저/함수는 호출한 쪽의 트랜잭션에 포함되는 것이 아니라,
-독자적인 자신만의 트랜잭션 안에서 실행된다.
-이 경우에 저장 프로시저/함수 실행 도중에 DB 변경이 있었는데도 COMMIT이나 ROLLBACK이 실행되지 않으면 에러이다.
-그리고, COMMIT이나 ROLLBACK을 실행해도 호출한 쪽의 트랜잭션의 진행에는 영향을 미치지 않는다.
-
-Autonomous Transaction으로 선언되지 않은 저장 프로시저/함수는 호출한 쪽의 트랜잭션 안에 포함된다.
-이 경우에는 저장 프로시저/함수 안에서 호출한 COMMIT이나 ROLLBACK은 호출한 쪽의 트랜잭션에 대해서 동작한다.
-
-이 선언문은 최상위 선언부에서만 사용할 수 있다.
-즉, 내부 프로시저/함수나 BLOCK 실행문의 선언부에서는 사용할 수 없다.
-
 .. _stmt:
 
 ******************
@@ -850,7 +831,7 @@ BLOCK은 프로시저/함수와 마찬가지로 예외처리 구조를 가질 �
 
 
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
-* *declare_spec*: 변수, 상수, Exception, 커서, Autonomous Transaction, 내부 프로시저/함수 선언. (참조: :ref:`선언문 <decl>`)
+* *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언. (참조: :ref:`선언문 <decl>`)
 * *handler*:  지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
 * *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치된다. 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
 
@@ -973,7 +954,7 @@ EXECUTE IMMEDIATE
 
 :ref:`Dynamic SQL <dyn_sql>` 절에서 설명한 바와 같이
 실행 시간에 임의의 SQL을 문자열로 구성하여 EXECUTE IMMDIATE 문을 통해 실행할 수 있다.
-USING 절을 써서 프로그램 상의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하고,
+USING 절을 써서 프로그램의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하고,
 INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 파라미터에 담아오는 것도 가능하다.
 
 ::
@@ -981,14 +962,14 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
     <execute_immediate> ::=
         EXECUTE IMMEDIATE <dynamic_sql> { [ <into_clause> ] [ <using_clause> ] | <using_clause> <into_clause> }
         <using_clause> ::= USING <using_element> [ , <using_element>, ... ]
-        <using_element> ::= [ { IN | IN OUT | INOUT | OUT } ] <expression>
+        <using_element> ::= [ IN ] <expression>
         <into_clause> ::= INTO <identifier> [ , <identifier>, ... ]
 
 
 * *dynamic_sql*: 문자열 타입을 갖는 표현식. 표현식은 SQL 규약에 맞는 SQL 구문 문자열을 계산 결과로 가져야 한다.
   SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 갯수와 *using_clause*\에
   포함된 표현식의 갯수는 일치해야 한다.
-* *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다.  IN, IN OUT, INOUT, OUT 네 가지 타입으로 지정할 수 있다.
+* *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다.
 * *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 파라미터를 지정한다.
 
 다음은 EXECUTE IMMEDIATE의 사용예이다.
@@ -1180,7 +1161,7 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 �
 * *label_declaration*: 오직 루프문 시작 부분에서만 라벨 선언을 할 수 있다. 이 라벨은 루프 바디 안 쪽의 CONTINUE 문이나 EXIT 문이 분기 기준이 될 루프를 지정하는데 사용된다.
 * *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER 타입을 갖는다. step은 1보다 크거나 같아야 한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
 * *for-cursor-loop*, *for-static-sql-loop*, *for-dynamic-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
-* *for-dynamic-sql-loop* 문 안에서의 *using_clause*\는 EXECUTE IMMEDIATE 문에서와는 달리 OUT 키워드를 지정할 수 없다.
+* *for-dynamic-sql-loop* 문 안에서의 *using_clause*\는 EXECUTE IMMEDIATE 문에서와 동일하다.
 
 다음은 For-Iterator Loop 구문의 사용예를 보여준다.
 
@@ -1310,10 +1291,10 @@ PL/CSQL의 표현식의 종류는 다음 문법으로 요약할 수 있다.
         | TIMESTAMP <quoted_string>
         | <numeric>
         | <quoted_string>
-        | { [ <literal> [, <literal> ... ] ] }
         | NULL
         | TRUE
         | FALSE
+
     <numeric> ::= UNSIGNED_INTEGER | FLOATING_POINT_NUM
 
     <cursor_attribute> ::= { %ISOPEN | %FOUND | %NOTFOUND | %ROWCOUNT }
@@ -1324,17 +1305,20 @@ PL/CSQL의 표현식의 종류는 다음 문법으로 요약할 수 있다.
         | * | / | + | -
         | >> | << | & | ^ | '|'
         | ||
+
     <unary_op> ::= + | - | NOT | ~
 
     <case_expression> ::=
           CASE <expression> <case_expression_when_part>... [ ELSE <expression> ] END
         | CASE <case_expression_when_part>... [ ELSE <expression> ] END
+
     <case_expression_when_part> ::= WHEN <expression> THEN <expression>
 
 리터럴
 =================
-리터럴에는 날짜/시간(DATE, TIME, TIMESTAMP, DATETIME), 숫자, 문자열, 컬렉션, NULL, TRUE, FALSE 값이 있다.
-비트열을 사용할 수 없다는 점을 제외하고 `SQL 리터럴 <https://www.cubrid.org/manual/ko/11.2/sql/literal.html#>`_\과 동일하다.
+리터럴에는 날짜/시간, 숫자, 문자열, NULL, TRUE, FALSE 값이 있다.
+비트열과 컬렉션을 사용할 수 없다는 점을 제외하고 리터럴 관련 규칙은
+`SQL 리터럴 <https://www.cubrid.org/manual/ko/11.2/sql/literal.html#>`_\과 동일하다.
 
 식별자
 =================
@@ -1342,7 +1326,7 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 식별자에는
 
 * 선언부에서 선언된 변수, 상수, 커서, Exception, 내부 프로시저/함수
 * 프로시저/함수의 파라미터
-* 암묵적으로 선언된 :ref:`For 루프<loop>`\의 iterator - integer와 record
+* 암묵적으로 선언된 :ref:`For 루프<loop>`\의 iterator - integer이거나 record
 
 명시적 혹은 암묵적 선언 없이 식별자를 사용하면 컴파일 에러가 발생한다.
 
@@ -1409,8 +1393,8 @@ PL/CSQL은 다음과 같이 연산자 우선 순위를 갖는다.
 * %는 Static/Dynamic SQL 밖에서는 MOD와 동일한 의미의 나머지 연산자로 사용할 수 없다.
 * &&, !은 Static/Dynamic SQL 밖에서는 AND, NOT과 동일한 의미의 논리 연산자로 사용할 수 없다.
 * ||는 서버 설정 파라미터 pipes_as_concat 값과 상관없이 Static/Dynamic SQL 밖에서는 논리합(OR) 연산자로 사용할 수 없다.
-* +는 서버 설정 파라미터 plus_as_concat 값과 상관없이 Static/Dynamic SQL 밖에서는 문자열 병합 연산자로 사용할 수 없다.
-* Static/Dynamic SQL 밖에서의 문자열은 DB 설정과 관계 없이 UTF8 encoding을 따르며
+* +는 서버 설정 파라미터 plus_as_concat 값과 상관없이 Static/Dynamic SQL 밖에서는 숫자 덧셈과 문자열 병합 연산자로 사용된다.
+* Static/Dynamic SQL 밖에서의 문자열은 DB 설정과 상관없이 UTF8 encoding을 따르며
   이들 문자열들 사이의 비교는 해당 Unicode 배열들 사이의 사전식 비교법을 따른다.
   Static/Dynamic SQL 안에서의 문자열의 encoding과 비교는 DB와 테이블 설정을 따른다.
 
