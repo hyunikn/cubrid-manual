@@ -280,7 +280,7 @@ Static/Dynamic SQL에서는 SQL에서 제공하는 모든
 `데이터 타입 <https://www.cubrid.org/manual/ko/11.2/sql/datatype_index.html>`_\을 쓸 수 있다.
 
 반면, Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 데이터 타입은
-SQL에서 제공하는 데이터 타입 중 일부와 BOOLEAN, SYS_REFCURSOR이다.
+BOOLEAN, SYS_REFCURSOR와 SQL에서 제공하는 데이터 타입 중 일부이다.
 
 * BOOLEAN: TRUE, FALSE, NULL을 값으로 가질 수 있다.
   CREATE PROCEDURE/FUNCTION 문에서 파라미터 타입이나 리턴 타입으로 BOOLEAN을 사용할 수는 없다.
@@ -292,7 +292,8 @@ SQL에서 제공하는 데이터 타입 중 일부와 BOOLEAN, SYS_REFCURSOR이�
   BOOLEAN과 마찬가지로 CREATE PROCEDURE/FUNCTION 문에서 파라미터 타입이나 리턴 타입으로 SYS_REFCURSOR를 사용할 수 없고,
   :ref:`내부 프로시저/함수 <local_routine_decl>`\에는 사용할 수 있다.
 
-SQL에서 제공하는 데이터 타입 중 Static/Dynamic SQL 밖의 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
+SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
+단, 위에서 언급한 대로 Static/Dynamic SQL에서는 SQL에서 제공하는 모든 데이터 타입을 쓸 수 있다.
 
 +----------------+-------------------------------------+----------------------------------+
 | 유형           | 지원                                | 미지원                           |
@@ -325,9 +326,7 @@ SQL에서 제공하는 데이터 타입 중 Static/Dynamic SQL 밖의 PL/CSQL에
 |                |                                     | JSON                             |
 +----------------+-------------------------------------+----------------------------------+
 
-변수, 상수, 프로시저/함수, 커서를 선언할 때 위 표에서 '지원' 컬럼에 열거된 타입을 쓸 수 있다.
-
-테이블 컬럼 이름 뒤에 '%TYPE'을 덧붙여 해당 컬럼의 선언 타입을 나타낼 수 있다.
+테이블 컬럼 이름 뒤에 '%TYPE'을 덧붙여 해당 컬럼의 타입을 나타낼 수 있다.
 아래는 %TYPE을 사용하는 예제이다.
 
 .. code-block:: sql
@@ -349,7 +348,14 @@ SQL에서 제공하는 데이터 타입 중 Static/Dynamic SQL 밖의 PL/CSQL에
 그러므로, %TYPE을 적용한 테이블 컬럼의 타입이 변경되었을 때에는 그 %TYPE을 사용한 저장 프로시저/함수에 대해서 모두
 ALTER PROCEDURE/FUNCTION <name> REBUILD (TODO) 문을 실행해서 재컴파일 해주어야 한다.
 
-테이블 컬럼 뿐만 아니라 프로시저/함수의 인자나 변수 이름 뒤에 %TYPE을 덧붙여 그 인자나 변수의 선언 타입을 나타낼 수 있다.
+테이블 컬럼 뿐만 아니라 프로시저/함수의 인자나 변수 이름 뒤에 %TYPE을 덧붙여 그 인자나 변수의 타입을 나타낼 수 있다.
+
+.. code-block:: sql
+
+   ...
+   a VARCHAR(10);
+   a_like a%TYPE;   -- 변수 a와 동일한 타입으로 변수 a_like 을 선언
+   ...
 
 현재, PL/CSQL은 사용자 정의 타입을 지원하지 않는다.
 
@@ -364,17 +370,17 @@ Static/Dynamic SQL에서는 SQL에서 제공하는 모든 연산자와 함수를
 반면, Static/Dynamic SQL 밖의 PL/CSQL 문에서는 SQL에서 제공하는 모든 연산자와 함수를
 대부분 동일하게 쓸 수 있으나 다음 몇 가지 예외가 있다.
 
-* 지원하지 않는 타입(BIT, ENUM, BLOB/CLOB, JSON, 등)의 값을 인자나 결과로 갖는 연산자와 함수는 쓸 수 없음
-* 나머지 연산자 %를 쓸 수 없음
+* 지원하지 않는 타입(BIT, ENUM, BLOB/CLOB, JSON, 등)의 값을 인자나 결과로 갖는 연산자와 함수는 쓸 수 없다.
+* 나머지 연산자 %를 쓸 수 없다.
 
-  + 단, 동일한 의미의 MOD를 대신 쓸 수 있음
+  + 단, 동일한 의미의 MOD를 대신 쓸 수 있다.
 
-* 논리 연산자 &&, ||, ! 들을 쓸 수 없음
+* 논리 연산자 &&, ||, ! 들을 쓸 수 없다.
 
-  + 단, 각각 동일한 의미의 AND, OR, NOT을 대신 쓸 수 있음
-  + 특히, ||는 서버 설정 파라미터 pipes_as_concat 값에 상관없이 논리합 연산자로 쓰이지 않음
+  + 단, 각각 동일한 의미의 AND, OR, NOT을 대신 쓸 수 있다.
+  + 특히, ||는 서버 설정 파라미터 pipes_as_concat 값에 상관없이 논리합 연산자로 쓰이지 않다.
 
-* 서버 설정 파라미터 plus_as_concat 값에 상관없이 +가 숫자 덧셈과 문자열 병합 연산자로 쓰임
+* 서버 설정 파라미터 plus_as_concat 값에 상관없이 +가 숫자 덧셈과 문자열 병합 연산자로 쓰인다.
 
 다음 예제는 문자열 함수 locate과 substr, 그리고 문자열 병합 연산자 ||를 Static/Dynamic SQL 밖의
 PL/CSQL 실행문에서도 사용할 수 있음을 보여준다.
