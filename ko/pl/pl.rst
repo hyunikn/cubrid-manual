@@ -515,7 +515,7 @@ Static/Dynamic SQL 문의 동작은 각종 `서버 설정 <https://www.cubrid.or
 
 변수 선언에 선택적으로 NOT NULL 조건과 초기값을 지정할 수 있다.
 NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 함께 지정되어야 한다.
-선언할 때 초기값이 지정되지 않은 변수는 암묵적으로 NULL 값을 갖게 된다.
+선언할 때 초기값이 지정되지 않은 변수는 묵시적으로 NULL 값을 갖게 된다.
 
 .. code-block:: sql
 
@@ -673,7 +673,7 @@ Exception 선언
     END;
 
 커서는 위 예제처럼 명시적으로 OPEN, FETCH, CLOSE 실행문을 통해 이용할 수 있다.
-반면, 아래 예제처럼 OPEN, FETCH, CLOSE 동작이 암묵적으로 이루어지는 For-Loop 문을 통해서 커서를 이용할 수도 있다.
+반면, 아래 예제처럼 OPEN, FETCH, CLOSE 동작이 묵시적으로 이루어지는 For-Loop 문을 통해서 커서를 이용할 수도 있다.
 이 경우에는 사용자가 명시적으로 커서를 닫아줄 필요가 없다.
 
 .. code-block:: sql
@@ -1332,9 +1332,9 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 식별자에는
 
 * 선언부에서 선언된 변수, 상수, 커서, Exception, 내부 프로시저/함수
 * 프로시저/함수의 파라미터
-* 암묵적으로 선언된 :ref:`For 루프<loop>`\의 iterator - integer이거나 record
+* 묵시적으로 선언된 :ref:`For 루프<loop>`\의 iterator - integer이거나 record
 
-명시적 혹은 암묵적 선언 없이 식별자를 사용하면 컴파일 에러가 발생한다.
+명시적 혹은 묵시적 선언 없이 식별자를 사용하면 컴파일 에러가 발생한다.
 
 Static SQL 결과 크기
 ====================
@@ -1410,7 +1410,7 @@ PL/CSQL은 다음과 같이 연산자 우선 순위를 갖는다.
 =================
 
 PL/CSQL에서는 명시적인 레코드 타입과 레코드 변수 선언을 지원하지 않지만,
-FOR 문에서 SELECT 결과를 순회하기 위해 암묵적으로 선언되는 레코드 변수를 사용할 수 있다.
+FOR 문에서 SELECT 결과를 순회하기 위해 묵시적으로 선언되는 레코드 변수를 사용할 수 있다.
 즉, FOR 문 iterator에 SELECT 결과 컬럼 이름을 덧붙여 해당 컬럼값을 레코드 필드 참조하듯이 사용할 수 있다.
 
 .. code-block:: sql
@@ -1422,7 +1422,7 @@ FOR 문에서 SELECT 결과를 순회하기 위해 암묵적으로 선언되는 
         FROM history
         WHERE athlete = p_name;
     BEGIN
-        FOR r IN my_cursor LOOP     -- r: 암묵적으로 선언됨
+        FOR r IN my_cursor LOOP     -- r: 묵시적으로 선언됨
             DBMS_OUTPUT.put_line('host_year: ' || r.host_year || ' score: ' || r.score);    -- r.<column-name>
         END LOOP;
     END;
