@@ -1462,8 +1462,8 @@ Limiting Broker Access
 ----------------------
 
 To limit the client applications accessing the broker, set to **ON** for the **ACCESS_ CONTROL** parameter in the **cubrid_broker.conf** file, and enter a name of the file in which the users and the list of databases and IP addresses allowed to access the **ACCESS_CONTROL_FILE** parameter value are written. 
-The default value of the **ACCESS_CONTROL** broker parameter is **OFF**. 
-The **ACCESS_CONTROL** and **ACCESS_CONTROL_FILE** parameters must be written under [broker] which common parameters are specified.
+The default value of the **ACCESS_CONTROL** broker parameter is **OFF**. All access to brokers not listed in **ACCESS_CONTROL_FILE** is restricted. Even if not listed in **ACCESS_CONTROL_FILE**, you can allow access to a specific broker by setting **ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER** to **ALLOW** for that broker.
+The **ACCESS_CONTROL** and **ACCESS_CONTROL_FILE** parameters must be written under the [broker] section where common parameters are specified. On the other hand, the **ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER** parameter must be specified for each broker.
 
 The format of **ACCESS_CONTROL_FILE** is as follows: 
 
@@ -1491,6 +1491,12 @@ The format of the ip_list_file is as follows:
 *   <ip_addr>: An IP address that is allowed to access the server. If the last digit of the address is specified as \*, all IP addresses in that rage are allowed to access the broker server.
 
 If a value for **ACCESS_CONTROL** is set to ON and a value for **ACCESS_CONTROL_FILE** is not specified, the broker will only allow the access requests from the localhost. 
+However, if **ACCESS_CONTROL_FILE** is not specified, all requests are allowed for brokers with **ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER** set to **ALLOW**.
+
+Broker access restrictions not specified in **ACCESS_CONTROL_FILE**.
+
+* Allow access only from localhost. (default)
+* If **ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER** is set to **ALLOW**, all access is allowed.
 
 If the analysis of **ACCESS_CONTROL_FILE** and ip_list_file fails when starting a broker, the broker will not be run.  
 
@@ -1505,6 +1511,7 @@ If the analysis of **ACCESS_CONTROL_FILE** and ip_list_file fails when starting 
     [%QUERY_EDITOR]
     SERVICE                 =ON
     BROKER_PORT             =30000
+    ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER = ALLOW
     ......
 
 The following example shows the content of **ACCESS_CONTROL_FILE**. The * symbol represents everything, and you can use it when you want to specify database names, database user IDs and IPs in the IP list file which are allowed to access the broker server.  
@@ -1559,6 +1566,8 @@ To configure databases, database user IDs and IPs allowed to access the broker a
 
 *   <BR_NAME>: A broker name. If you specify this value, you can apply the changes only to specified brokers. If you omit it, you can apply the changes to all brokers.
 
+.. note:: Existing connections are not affected by reconfiguration of the access control list using the acl reload command. It means, it is applied only to new connections. To take effect changes on the connected connections, the broker must be restarted.
+
 To display the databases, database user IDs and IPs that are allowed to access the broker in running on the screen, use the following command.  
 
 ::
@@ -1576,6 +1585,7 @@ The below is an example of displaying results.
     ACCESS_CONTROL_FILE=access_file.txt 
   
     [%broker1] 
+    ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER=DENY
     demodb:dba:iplist1.txt 
            CLIENT IP LAST ACCESS TIME 
     ========================================== 
@@ -1589,7 +1599,12 @@ The below is an example of displaying results.
            CLIENT IP LAST ACCESS TIME 
     ========================================== 
                    * 2013-11-08 10:10:12 
-
+    
+    [%broker2]
+    ACCESS_CONTROL_BEHAVIOR_FOR_EMPTYBROKER=ALLOW
+	
+    ++ cubrid broker acl: success
+	
 **Broker Logs**
 
     If you try to access brokers through IP addresses that are not allowed, the following logs will be created.
