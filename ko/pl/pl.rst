@@ -512,8 +512,10 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
     <type_spec> ::=
           <builtin_type>
-        | <variable>%TYPE
         | <table>.<column>%TYPE
+        | <variable>%TYPE
+        | <table>%ROWTYPE
+        | <cursor>%ROWTYPE
     <initial_value_part> ::= { := | DEFAULT } <expression>
 
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
@@ -557,7 +559,7 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
         END;
 
     BEGIN
-        -- 여기서 a = 3, b는 VARCHAR 타입
+        -- 여기서 a = 3, b는 VARCHAR(10) 타입
 
         -- Block 실행문
         DECLARE
@@ -567,7 +569,7 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
             -- 여기서 a = 7, b는 DATETIME 타입
         END;
 
-        -- 다시 a = 3, b는 VARCHAR 타입
+        -- 다시 a = 3, b는 VARCHAR(10) 타입
     END;
 
 상수 선언
@@ -579,8 +581,10 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
 
     <type_spec> ::=
           <builtin_type>
-        | <variable>%TYPE
         | <table>.<column>%TYPE
+        | <variable>%TYPE
+        | <table>%ROWTYPE
+        | <cursor>%ROWTYPE
     <value_part> ::= { := | DEFAULT } <expression>
 
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
@@ -646,8 +650,10 @@ Exception 선언
     <cursor_parameter> ::= <identifier> [ IN ] <type_spec>
     <type_spec> ::=
           <builtin_type>
-        | <variable>%TYPE
         | <table>.<column>%TYPE
+        | <variable>%TYPE
+        | <table>%ROWTYPE
+        | <cursor>%ROWTYPE
 
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 
@@ -679,7 +685,6 @@ Exception 선언
 
 커서는 위 예제처럼 명시적으로 OPEN, FETCH, CLOSE 실행문을 통해 이용할 수 있다.
 반면, 아래 예제처럼 OPEN, FETCH, CLOSE 동작이 묵시적으로 이루어지는 For-Loop 문을 통해서 커서를 이용할 수도 있다.
-이 경우에는 사용자가 명시적으로 커서를 닫아줄 필요가 없다.
 
 .. code-block:: sql
 
@@ -701,7 +706,7 @@ Exception 선언
 ========================
 
 정의 중인 저장 프로시저/함수 안에서만 사용할 내부 프로시저/함수를 다음 문법에 따라 정의할 수 있다.
-어느 정도 규모를 이루거나 두 번 이상 반복되는 연관된 실행 과정을 내부 프로시저/함수로 묶어 모듈화하면
+어느 정도 규모를 이루거나 두 번 이상 반복되는 실행 과정을 내부 프로시저/함수로 묶어 모듈화하면
 프로그램 가독성이 높아지고 동일한 코드가 여러 군데 반복되는 일이 줄어든다.
 
 ::
@@ -715,8 +720,10 @@ Exception 선언
     <parameter> ::= <identifier> [ { IN | IN OUT | INOUT | OUT } ] <type_spec>
     <type_spec> ::=
           <builtin_type>
-        | <variable>%TYPE
         | <table>.<column>%TYPE
+        | <variable>%TYPE
+        | <table>%ROWTYPE
+        | <cursor>%ROWTYPE
     <body> ::= BEGIN <seq_of_statements> [ EXCEPTION <seq_of_handlers> ] END [ <label_name> ]
     <seq_of_declare_specs> ::= <declare_spec> [ <declare_spec> ... ]
     <seq_of_statements> ::= <statement> ; [ <statement> ; ... ]
@@ -730,13 +737,13 @@ Exception 선언
 * *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언 중 하나
 * *statement*: 아래 :ref:`실행문 <stmt>` 절 참조
 * *handler*: 지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
-* *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.  OTHERS가 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
+* *exception_name*: OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.  OTHERS가 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
 
-함수의 경우에는  *body*\에서 RETURN 절에 지정된 타입에 맞는 값을 반환해야 한다.
+함수의 경우에는  *body*\에서 RETURN 문으로 선언된 리턴타입에 맞는 값을 반환해야 한다.
 함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하는 실행경로가 존재하면 컴파일 과정에서 에러가 발생한다.
 프로시저의 경우에는 RETURN 문에 반환값을 지정하면 에러이다.
 
-프로시저/함수를 선언하면 자기 자신을 실행부에서 참조할 수 있다. 즉, 재귀 호출이 가능하다.
+프로시저/함수는 자기 자신을 실행부에서 참조할 수 있다. 즉, 재귀 호출이 가능하다.
 
 .. code-block:: sql
 
@@ -844,7 +851,8 @@ BLOCK은 프로시저/함수와 마찬가지로 예외처리 구조를 가질 �
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
 * *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언. (참조: :ref:`선언문 <decl>`)
 * *handler*:  지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
-* *exception_name*: OTHERS인 경우 아직까지 매치되지 않은 모든 Exception에 매치된다. 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
+* *exception_name*: OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.
+    OTHERS 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
 
 BLOCK 안에서 선언된 아이템들은 그 BLOCK을 벗어나면 참조할 수 없다.
 BLOCK에서 선언된 아이템이 바깥 scope에서 선언된 다른 아이템과 이름이 겹칠 경우
@@ -1148,9 +1156,9 @@ IF
 
 LOOP
 ====
-PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 있다.
+PL/CSQL이 제공하는 루프문은 아래와 같이 다섯 가지 형태가 있다.
 앞의 세 가지는 일반적인 프로그래밍 언어에서 제공하는 루프문과 유사하다.
-뒤의 세 가지는 SELECT 문의 조회 결과를 순회하는 용도로 사용한다.
+뒤의 두 가지는 SELECT 문의 조회 결과를 순회하는 용도로 사용한다.
 ::
 
     <loop_statement> ::=
@@ -1159,7 +1167,6 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 �
         | <label_declaration>? FOR <iterator> LOOP <seq_of_statements> END LOOP           # for-iter-loop
         | <label_declaration>? FOR <for_cursor> LOOP <seq_of_statements> END LOOP         # for-cursor-loop
         | <label_declaration>? FOR <for_static_sql> LOOP <seq_of_statements> END LOOP     # for-static-sql-loop
-        | <label_declaration>? FOR <for_dynamic_sql> LOOP <seq_of_statements> END LOOP    # for-dynamic-sql-loop
 
     <label_declaration> ::= '<<' <identifier> '>>'
 
@@ -1167,12 +1174,10 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 �
 
     <for_cursor>      ::= <record> IN <cursor_expression> [ <function_argument> ]
     <for_static_sql>  ::= <record> IN ( <select_statement> )
-    <for_dynamic_sql> ::= <record> IN ( EXECUTE IMMEDIATE <dynamic_sql> [ <using_clause> ] )
 
 * *label_declaration*: 오직 루프문 시작 부분에서만 라벨 선언을 할 수 있다. 이 라벨은 루프 바디 안 쪽의 CONTINUE 문이나 EXIT 문이 분기 기준이 될 루프를 지정하는데 사용된다.
 * *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER 타입을 갖는다. step은 1보다 크거나 같아야 한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
-* *for-cursor-loop*, *for-static-sql-loop*, *for-dynamic-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
-* *for-dynamic-sql-loop* 문 안에서의 *using_clause*\는 EXECUTE IMMEDIATE 문에서와 동일하다.
+* *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
 
 다음은 For-Iterator Loop 구문의 사용예를 보여준다.
 
@@ -1192,7 +1197,7 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 �
         END LOOP;
     END;
 
-다음은 동일한 SELECT 문을 세 가지 다른 형태의 For Loop으로 조회하는 예를 보여준다.
+다음은 동일한 SELECT 문을 두 가지 다른 형태의 For Loop으로 조회하는 예를 보여준다.
 
 .. code-block:: sql
 
@@ -1210,11 +1215,6 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 여섯 가지 형태가 �
 
         -- For-Select Loop
         FOR r IN (SELECT host_year, score FROM history WHERE athlete = p_name) LOOP
-            DBMS_OUTPUT.put_line('host_year: ' || r.host_year || ' score: ' || r.score);
-        END LOOP;
-
-        -- For-Dynamic-SQL Loop
-        FOR r IN (EXECUTE IMMEDIATE 'SELECT host_year, score FROM history WHERE athlete = ?' USING p_name) LOOP
             DBMS_OUTPUT.put_line('host_year: ' || r.host_year || ' score: ' || r.score);
         END LOOP;
     END;
@@ -1235,7 +1235,8 @@ CASE 문은 두 가지 형태가 있다.
 
 * 첫번째 형태는 CASE 키워드 직후에 표현식을 갖는다. 우선 이 최초 표현식을 계산한 다음, 이후 WHEN 절의 표현식을 하나씩 차례로 계산해서 최초 표현식과 일치하는 값을 찾고, 해당 THEN 절의 실행문들을 실행한다. 최초 표현식은 단 한번 계산된다.
 * 두번째 형태는 CASE 키워드 직후에 표현식을 갖지 않는다. CASE 키워드 이후 여러 개의 WHEN 절의 표현식은 BOOLEAN 타입을 가져야 한다. 이들 표현식을 하나씩 차례로 계산하다가 처음으로 TRUE 값이 되는 표현식이 발견되면 해당 THEN 절의 실행문을 실행한다.
-* 두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 실행할 실행문들을 지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때는 CASE_NOT_FOUND라는 시스템 예외가 발생한다.
+
+두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 실행할 실행문들을 지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때는 CASE_NOT_FOUND라는 시스템 예외가 발생한다.
 
 다음은 첫 번째 형태의 CASE 문 예제이다.
 
@@ -1337,7 +1338,7 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 식별자에는
 
 * 선언부에서 선언된 변수, 상수, 커서, Exception, 내부 프로시저/함수
 * 프로시저/함수의 파라미터
-* 묵시적으로 선언된 :ref:`For 루프<loop>`\의 iterator - integer이거나 record
+* 묵시적으로 선언된 :ref:`For 루프<loop>`\의 iterator. integer 타입이거나 record 타입
 
 명시적 혹은 묵시적 선언 없이 식별자를 사용하면 컴파일 에러가 발생한다.
 
@@ -1412,9 +1413,12 @@ PL/CSQL은 다음과 같이 연산자 우선 순위를 갖는다.
 레코드 필드 참조
 =================
 
-PL/CSQL에서는 명시적인 레코드 타입과 레코드 변수 선언을 지원하지 않지만,
-FOR 문에서 SELECT 결과를 순회하기 위해 묵시적으로 선언되는 레코드 변수를 사용할 수 있다.
-즉, FOR 문 iterator에 SELECT 결과 컬럼 이름을 덧붙여 해당 컬럼값을 레코드 필드 참조하듯이 사용할 수 있다.
+PL/CSQL에서는 다음 두 가지 경우에 레코드 변수를 사용할 수 있다.
+
+* FOR 문에서 SELECT 결과를 순회하기 위해 묵시적으로 선언되는 레코드 변수
+* %ROWTYPE으로 선언된 레코드 변수
+
+레코드 변수에 대해서 필드 이름을 덧붙여 레코드 필드를 참조할 수 있다.
 
 .. code-block:: sql
 
@@ -1433,8 +1437,7 @@ FOR 문에서 SELECT 결과를 순회하기 위해 묵시적으로 선언되는 
 함수 호출
 =================
 
-함수는 프로시저와 달리 반환값이 있으므로 표현식으로 쓸 수 있다.
-인자 갯수와 각각의 타입은 해당 함수의 선언과 일치해야 한다.
+함수 호출 표현식에서 인자 갯수와 각각의 타입은 해당 함수의 선언과 일치해야 한다.
 호출되는 함수의 OUT 파라미터에 주어질 인자들은 호출 결과 변경이 일어나게 되므로
 대입이 가능한 변수나 다른 OUT 파라미터이어야 한다.
 
@@ -1447,7 +1450,8 @@ CASE 표현식은 :ref:`CASE 실행문 <case_stmt>`\(Statement)과 마찬가지�
 
 * CASE 키워드 직후에 표현식을 갖는 형태에서는 우선 이 최초 표현식을 계산한 다음, WHEN 절들의 표현식을 하나씩 차례로 계산해서 최초 표현식과 일치하는 값을 찾고, 해당 THEN 절의 표현식을 계산해서 CASE문의 최종값으로 한다. 최초 표현식은 단 한번 계산된다.
 * CASE 키워드 직후에 표현식을 갖지 않는 형태에서는 CASE 키워드 이후 여러 개의 WHEN 절의 표현식은 BOOLEAN 타입을 가져야 한다. 이들 표현식을 하나씩 차례로 계산하다가 처음으로 TRUE 값이 되는 표현식이 발견되면 해당 THEN 절의 표현식을 계산해서 CASE문의 최종값으로 한다.
-* 두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 값으로 가질 표현식을  지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때 전체 CASE 표현식은 NULL 값을 갖는다.
+
+두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 값으로 가질 표현식을  지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때 전체 CASE 표현식은 NULL 값을 갖는다.
 
 다음은 첫 번째 형태의 CASE 표현식 예제이다.
 
