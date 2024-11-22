@@ -107,12 +107,21 @@ SQL 구문 중에 다음에 해당하는 것들을 PL/CSQL 실행문으로 직�
 
 SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_decl>`\를 선언할 때나 :ref:`OPEN-FOR <cursor_manipulation>` 문에도 사용된다.
 
+
 SELECT 문의 INTO 절에 프로그램의 변수나 OUT 파라미터를 써서 조회 결과를 담을 수 있다.
 SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
 SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
 
+..
+    (TODO) examples
+..
+
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
 프로그램에서 선언한 변수나 프로시저/함수 파라미터를 쓸 수 있다.
+
+..
+    (TODO) examples
+..
 
 SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중
 `CUBRID SQL <https://www.cubrid.org/manual/ko/11.2/sql/index.html>`_\을 참고하도록 한다.
@@ -230,9 +239,10 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 +---------------------------------------------------------------------------------------+
 |   BEGIN, BETWEEN, BIGINT, BOOLEAN, BY                                                 |
 +---------------------------------------------------------------------------------------+
-|   CASE, CHAR, CHARACTER, CLOSE, COMMIT, CONSTANT, CONTINUE, CREATE, CURSOR            |
+|   CASE, CHAR, CHARACTER, CLOSE, COMMENT, COMMIT, CONSTANT, CONTINUE, CREATE, CURSOR   |
 +---------------------------------------------------------------------------------------+
-|   DATE, DATETIME, DBMS_OUTPUT, DEC, DECIMAL, DECLARE, DEFAULT, DELETE, DIV, DOUBLE    |
+|   DATE, DATETIME, DATETIMELTZ, DATETIMETZ, DBMS_OUTPUT, DEC, DECIMAL, DECLARE,        |
+|   DEFAULT, DELETE, DIV, DOUBLE                                                        |
 +---------------------------------------------------------------------------------------+
 |   ELSE, ELSIF, END, ESCAPE, EXCEPTION, EXECUTE, EXIT                                  |
 +---------------------------------------------------------------------------------------+
@@ -240,9 +250,9 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 +---------------------------------------------------------------------------------------+
 |   IF, IMMEDIATE, IN, INOUT, INSERT, INT, INTEGER, INTO, IS                            |
 +---------------------------------------------------------------------------------------+
-|   LANGUAGE, LIKE, LOOP                                                                |
+|   LANGUAGE, LIKE, LIST, LOOP                                                          |
 +---------------------------------------------------------------------------------------+
-|   MERGE, MOD                                                                          |
+|   MERGE, MOD, MULTISET                                                                |
 +---------------------------------------------------------------------------------------+
 |   NOT, NULL, NUMERIC                                                                  |
 +---------------------------------------------------------------------------------------+
@@ -252,9 +262,10 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 +---------------------------------------------------------------------------------------+
 |   RAISE, REAL, REPLACE, RETURN, REVERSE, ROLLBACK                                     |
 +---------------------------------------------------------------------------------------+
-|   SELECT, SHORT, SMALLINT, SQL, SQLCODE, SQLERRM, STRING, SYS_REFCURSOR               |
+|   SEQUENCE, SELECT, SET, SETEQ, SETNEQ, SHORT, SMALLINT, SQL, SQLCODE, SQLERRM,       |
+|   STRING, SUBSET, SUBSETEQ, SUPERSET, SUPERSETEQ, SYS_REFCURSOR                       |
 +---------------------------------------------------------------------------------------+
-|   THEN, TIME, TIMESTAMP, TRUE, TRUNCATE                                               |
+|   THEN, TIME, TIMESTAMP, TIMESTAMPLTZ, TIMESTAMPTZ, TRUE, TRUNCATE                    |
 +---------------------------------------------------------------------------------------+
 |   UPDATE, USING                                                                       |
 +---------------------------------------------------------------------------------------+
@@ -265,7 +276,7 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 |   XOR                                                                                 |
 +---------------------------------------------------------------------------------------+
 
-위에서 AUTONOMOUS_TRANSACTION 은 향후 추가할 기능을 위해서 미리 포함되어 있는 예약어이고 현재는 사용되지 않는다.
+위에서 AUTONOMOUS_TRANSACTION은 향후 추가할 기능을 위해서 미리 포함되어 있는 예약어이고 현재는 사용되지 않는다.
 
 ..
     (TODO) examples on comments and literals
