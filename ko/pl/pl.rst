@@ -363,6 +363,117 @@ ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일 해주�
    a_like a%TYPE;   -- 변수 a와 동일한 타입으로 변수 a_like 을 선언
    ...
 
+%ROWTYPE과 레코드 변수
+======================
+
+테이블 이름 뒤에 %ROWTYPE을 덧붙여서 그 테이블 컬럼들의 이름과 타입을 갖는 필드들로 이루어진 레코드 타입을 나타낼 수 있다.
+예를 들어, 다음과 같이 선언된 테이블 tbl에 대해서
+
+.. code-block:: sql
+
+   CREATE TABLE tbl(a INT, b CHAR, c VARCHAR);
+
+변수 r을 tbl%ROWTYPE 타입으로 선언하면
+
+.. code-block:: sql
+
+   r tbl%ROWTYPE;
+
+r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각 INT, CHAR, VARCHAR 타입을 갖는다.
+
+커서 이름 뒤에도 %ROWTYPE을 덧붙일 수 있다.
+이 때는 커서 정의에 주어진 SELECT 문의 결과에 해당하는 레코드 타입을 나타내게 된다.
+
+.. code-block:: sql
+
+   CURSOR c IS SELECT a, b from tbl;
+   p c%ROWTYPE;     -- p.a, p.b는 각각 INT, CHAR 타입
+
+레코드 변수의 선언문에서 초기값을 주지 않았을 때 그 변수는 모든 필드가 NULL인 '빈레코드'로 초기화 된다.
+
+.. code-block:: sql
+
+   r tbl%ROWTYPE;   -- r.a, r.b, r.c 모두 NULL. 그러나 r은 NULL 아닌 빈레코드
+
+레코드 변수에 NULL을 대입하면 각 필드가 NULL로 초기화 되지만 레코드 변수 값 자체가 NULL이 되지는 않는다.
+즉, 레코드 변수는 선언 이후로 NULL 값을 갖는 일이 없다.
+
+동일한 타입의 레코드끼리는 =과 != 연산자로 비교할 수 있다.
+대응하는 필드끼리 <=> 연산을 한 결과가 모두 TRUE일 때
+두 레코드에 대한 = 연산의 결과는 TRUE이고 그렇지 않으면 FALSE이다.
+!= 연산의 결과는 = 연산 결과의 반대이다.
+다른 타입의 레코드에 =와 != 연산자를 사용했을 때는 컴파일 과정에서 에러가 발생한다.
+
+..
+    (TODO) examples
+..
+
+다른 비교 연산자 <=>, <, >, <=, >= 들은 레코드 비교에 적용할 수 없다.
+
+한 레코드 변수 s로부터 다른 레코드 변수 t로의 대입이 다음 경우에 가능하다.
+
+* s와 t의 필드 갯수가 같다.
+* 각각의 필드 순번 i에 대해서, s와 t의 i번째 필드들의 타입을 S\ :sub:`i`\와 T\ :sub:`i`\라고 할 때, S\ :sub:`i`\에서 T\ :sub:`i`\로 대입 가능하다.
+
+레코드 변수 사이에 대입이 가능하기 위해서 같은 순번의 필드 이름들끼리 같을 필요는 없다.
+
+..
+    (TODO) examples
+..
+
+%ROWTYPE은 내부 프로시저/함수의 인자 타입과 리턴 타입으로 쓸 수 있다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL문에서 %ROWTYPE을 지원하지 않기 때문이다.
+
+..
+    (TODO) examples
+..
+
+Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 쓸 수 있다.
+단, 이 때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
+그리고, 조회 결과를 이루는 컬럼들과 레코드 필드들의 갯수가 같아야 한다.
+이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 컬럼 타입으로부터 필드 타입으로 대입 가능해야 한다.
+
+.. code-block:: sql
+
+   CURSOR c IS SELECT a, b from tbl;
+   whole tbl%ROWTYPE;
+   part c%ROWTYPE;
+
+   -- Static SQL
+   SELECT * INTO whole from tbl;
+
+   -- Dynamic SQL
+   EXECUTE IMMEDIATE 'SELECT * from tbl' INTO whole;
+   EXECUTE IMMEDIATE 'SELECT a, b from tbl' INTO part;
+
+   -- Fetch
+   FETCH c INTO part;
+
+Static SQL INSERT/REPLACE 문의 VALUES 절에 레코드 변수를 쓸 수 있다.
+단, 이 때 VALUES 절 안에 다른 변수를 함께 쓸 수 없다.
+그리고, 대입되는 테이블 컬럼들과 레코드 필드들의 갯수가 같아야 한다.
+이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 필드 타입으로부터 컬럼 타입으로 대입 가능해야 한다.
+
+.. code-block:: sql
+
+   INSERT INTO tbl VALUES whole;
+   INSERT INTO tbl(a, b) VALUES part;
+
+이 때 다음과 같은 형태도 가능하다.
+
+.. code-block:: sql
+
+   INSERT INTO tbl SET ROW = whole;
+   INSERT INTO tbl(a, b) SET ROW = part;
+
+
+Static SQL UPDATE 문에도 다음과 같이 'SET ROW = <record>' 구문을 사용하여 레코드 변수를 사용할 수 있다.
+단, 단일 테이블 갱신에만 사용되며 각각의 레코드 필드로부터 동일 순번의 테이블 컬럼으로 대입 가능해야 한다.
+
+.. code-block:: sql
+
+   UPDATE tbl SET ROW = whole WHERE a % 2 = 0;
+
 연산자와 함수
 ==================
 
