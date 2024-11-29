@@ -123,8 +123,7 @@ Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 �
     (TODO) examples
 ..
 
-SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중
-`CUBRID SQL <https://www.cubrid.org/manual/ko/11.2/sql/index.html>`_\을 참고하도록 한다.
+SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
 
 .. code-block:: sql
 
@@ -199,8 +198,7 @@ Dynamic SQL은 주로 다음 두 가지 경우에 필요하다.
 작성 규칙
 ==================
 
-식별자, 예약어, 주석, 리터럴을 작성할 때 Static/Dynamic SQL 안에서는
-`SQL의 작성 규칙 <https://www.cubrid.org/manual/ko/11.2/sql/syntax.html>`_\을 따른다.
+식별자, 예약어, 주석, 리터럴을 작성할 때 Static/Dynamic SQL 안에서는 :ref:`SQL의 작성 규칙 <lexical_rules>`\을 따른다.
 
 Static/Dynamic SQL 밖의 PL/CSQL 문 작성 규칙도 대체로 같은 규칙을 따르지만 다음 몇 가지 예외가 있다.
 
@@ -282,8 +280,7 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 데이터 타입
 ==================
 
-Static/Dynamic SQL에서는 SQL에서 제공하는 모든
-`데이터 타입 <https://www.cubrid.org/manual/ko/11.2/sql/datatype_index.html>`_\을 쓸 수 있다.
+Static/Dynamic SQL에서는 SQL에서 제공하는 모든 :ref:`데이터 타입 <datatype_index>`\을 쓸 수 있다.
 
 반면, Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 데이터 타입은
 BOOLEAN, SYS_REFCURSOR와 SQL에서 제공하는 데이터 타입 중 일부이다.
@@ -565,8 +562,7 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 서버 설정 적용 예외
 ==========================
 
-Static/Dynamic SQL 문의 동작은 `서버 설정 파라메터 <https://www.cubrid.org/manual/ko/11.2/admin/config.html#id2>`_
-전체의 영향을 동일하게 받는다.
+Static/Dynamic SQL 문의 동작은 :ref:`서버 설정 파라메터 <system_config>` 전체의 영향을 동일하게 받는다.
 
 Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파라미터만이 유효하다.
 
@@ -1440,8 +1436,7 @@ PL/CSQL의 표현식의 종류는 다음 문법으로 요약할 수 있다.
 리터럴
 =================
 리터럴에는 날짜/시간, 숫자, 문자열, NULL, TRUE, FALSE 값이 있다.
-비트열과 컬렉션을 사용할 수 없다는 점을 제외하고 리터럴 관련 규칙은
-`SQL 리터럴 <https://www.cubrid.org/manual/ko/11.2/sql/literal.html#>`_\과 동일하다.
+비트열과 컬렉션을 사용할 수 없다는 점을 제외하고 리터럴 관련 규칙은 :ref:`SQL 리터럴 <sql_literal>`\과 동일하다.
 
 식별자
 =================
