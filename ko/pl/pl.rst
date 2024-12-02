@@ -169,6 +169,25 @@ SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_
 
 .. _dyn_sql:
 
+CREATE PROCEDURE/FUNCTION 문을 실행하면 저장 프로시저/함수의 문법과 실행의미에 관련된 각종 규칙들을 검사한다.
+검사에서 오류가 발견되면 오류의 위치와 원인을 설명하는 메시지를 클라이언트 응용 프로그램으로 전달한다.
+다음은 오류를 가지고 있는 저장 프로시저가 CSQL에서 에러를 발생시키는 예이다.
+
+.. code-block:: sql
+
+    csql> CREATE OR REPLACE PROCEDURE athlete_code(p_name VARCHAR) AS
+    csql> BEGIN
+    csql>     -- 오류: Static SQL SELECT 문은 INTO 절을 가져야 함
+    csql>     SELECT code
+    csql>     FROM athlete a
+    csql>     WHERE a.name = p_name;
+    csql> END;
+
+    ERROR: In line 4, column 5
+    Stored procedure compile error: SELECT statement must have an INTO clause
+
+    0 command(s) successfully processed.
+
 Dynamic SQL
 ==================
 
@@ -565,7 +584,7 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 
 발생한 Exception이 마지막까지 WHEN ... THEN ... 절로 처리되지 않은 경우에는
 코드상에서의 Exception 발생 위치와 에러메시지가 DBMS에 접속한 클라이언트 응용 프로그램에 전달된다.
-위 athlete_code()에서 Exception 처리절을 삭제하고
+예를 들어, 위 athlete_code()에서 Exception 처리절들을 삭제하고
 
 .. code-block:: sql
 
