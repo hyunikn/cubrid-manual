@@ -507,13 +507,14 @@ PL/CSQL 실행문에서도 사용할 수 있음을 보여준다.
     ******************
 ..
 
-시스템 Exception
+Exception
 ======================
 
 PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸들러를 통한 에러 처리를 지원한다
 (참고: :ref:`Block 실행문 <block_stmt>`).
-사용자가 프로그램 선언부에서 자신만의 Exception을 정의할 수 있지만,
-주요 예외 상황에 대해서는 다음과 같이 시스템 Exception들이 미리 정의되어 있다.
+사용자가 프로그램 선언부에서 자신만의 Exception을 정의하고 실행부에서 사용할 수 있다
+(참고: :ref:`Exception 선언 <exception_decl>`).
+그리고, 주요 예외 상황에 대해서는 다음과 같이 시스템 Exception들이 미리 정의되어 있다.
 
 +---------------------+------------------------------------------------------------------+
 | CASE_NOT_FOUND      | CASE 문에서 조건이 참인 WHEN 절이 없고 ELSE 절도 없음            |
@@ -537,6 +538,9 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 | ZERO_DIVIDE         | 0으로 나누기 시도                                                |
 +---------------------+------------------------------------------------------------------+
 
+다음은 Static SQL SELECT 문을 실행할 때 발생할 수 있는 시스템 Exception NO_DATA_FOUND와 TOO_MANY_ROWS를
+처리하는 간단한 예제이다.
+
 .. code-block:: sql
 
     CREATE OR REPLACE FUNCTION athlete_code(p_name VARCHAR) RETURN integer
@@ -558,6 +562,42 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
             DBMS_OUTPUT.put_line('error: more than one rows found for athlete name ' || p_name);
             RETURN -1;
     END;
+
+발생한 Exception이 마지막까지 WHEN ... THEN ... 절로 처리되지 않은 경우에는
+코드상에서의 Exception 발생 위치와 에러메시지가 DBMS에 접속한 클라이언트 응용 프로그램에 전달된다.
+위 athlete_code()에서 Exception 처리절을 삭제하고
+
+.. code-block:: sql
+
+    CREATE OR REPLACE FUNCTION athlete_code(p_name VARCHAR) RETURN integer
+    AS
+        c INTEGER;
+    BEGIN
+        -- SELECT INTO 문은 단 하나, 그리고 오직 하나의 Row를 결과로 가져야 함
+        SELECT code
+        INTO c
+        FROM athlete a
+        WHERE a.name = p_name;
+
+        RETURN c;
+    END;
+
+CSQL에서 athlete 테이블에 존재하지 않는 이름을 인자로 주어 NO_DATA_FOUND Exception을 일으켰을 때 결과는 다음과 같다.
+
+.. code-block::
+
+   csql> select athlete_code('x');
+
+   In line 1, column 22,
+
+   ERROR: Stored procedure execute error:
+     (line 6, column 5) no data found
+
+
+   0 command(s) successfully processed.
+
+위에서 위치 (1, 22)는 SELECT 문 안에서의 위치를 나타내고, (6, 5)는 athlete_code()를 선언한 CREATE 문 안에서의
+위치를 나타낸다.
 
 서버 설정 적용 예외
 ==========================
@@ -708,6 +748,8 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
     BEGIN
         ...
     END;
+
+.. _exception_decl:
 
 Exception 선언
 ==============
