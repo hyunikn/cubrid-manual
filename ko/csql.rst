@@ -341,7 +341,42 @@ CSQL 시작 옵션
 
 CSQL 인터프리터에는 SQL 문 이외에 CSQL 인터프리터를 제어하는 특별한 명령어가 있으며 이를 세션 명령어라고 한다. 모든 세션 명령어는 반드시 세미콜론(;)으로 시작해야 한다.
 
-**;help** 를 입력하여 CSQL 인터프리터에서 지원되는 세션 명령어를 확인할 수 있다. 세션 명령어를 전부 입력하지 않고 대문자로 표시된 글자까지만 입력해도 CSQL 인터프리터는 세션 명령어를 인식한다. 세션 명령어는 대소문자를 구분하지 않는다. 
+**;help** 를 입력하여 CSQL 인터프리터에서 지원되는 세션 명령어를 확인할 수 있다. 세션 명령어를 전부 입력하지 않고 대문자로 표시된 글자까지만 입력해도 CSQL 인터프리터는 세션 명령어를 인식한다. 세션 명령어는 대소문자를 구분하지 않는다.
+
+CSQL은 SQL의 문자열 리터럴, 주석, 식별자를 (참고: :ref:`작성 규칙 <lexical_rules>`) 인식하면서 동작한다. 특히,
+
+* 작은 따옴표로 둘러싸인 문자열 리터럴
+* '/\*'와 '\*/'로 둘러싸인 C 언어 방식 주석
+* 큰따옴표, 대괄호, 백틱 부호로 둘러싸인 식별자
+
+안에 위치하는 문자열은 이들의 밖에서 가질 수 있는 고유의 의미를 잃고 오로지 문자열로만 인식되는데,
+이것은 세션 명령어에 대해서도 마찬가지이다.
+예를 들어, 아래 문자열 리터럴, 주석, 식별자 안의 ';exit'은 세션 명령어로서 동작하지 않는다. ::
+
+    csql> select * from table_a where col = ';exit';
+    ...
+    csql> select * from table_b /* ;exit on no results */;
+    ...
+    csql> create table table_c([;exit] int);
+    ...
+
+여기서 주의할 한 가지 예외가 있다. 이들 영역 안일지라도 CSQL이 대화형 모드이고 명령행을 세미콜론으로 시작하면
+세션 명령어로 인식한다는 것이다. ::
+
+    csql> select * from table_a where col = '
+    csql> ;exit    <-- CSQL 종료
+    ...
+    csql> select * from table_b /*
+    csql> ;exit    <-- CSQL 종료
+    ...
+    csql> create table table_c([
+    csql> ;exit    <-- CSQL 종료
+    ...
+
+이 성질은 CSQL을 종료한다거나 (:ref:`;exit <scmd_exit>`),
+편집하던 내용을 에디터로 이어서 편집한다거나 (:ref:`;edit <scmd_edit>`),
+질의 버퍼를 비운다거나 (:ref:`;clear <scmd_clear>`) 하는 등의 작업을
+편집 위치에 상관없이 언제나 가능하도록 하기 위해서 필요하다.
 
 "질의 버퍼"는 질의문을 실행하기 전까지 질의문을 저장하는 버퍼이다. **\-\-no-single-line** 옵션을 부여하여 CSQL을 실행하는 경우 **;xr** 명령으로 질의를 실행하기 전까지는 질의문을 버퍼에 유지한다.
 
@@ -450,11 +485,15 @@ CSQL 인터프리터를 실행한 현재 작업 디렉터리를 지정된 디렉
     csql> ;cd /home1/DBA/CUBRID
     Current directory changed to  /home1/DBA/CUBRID.
 
+.. _scmd_exit:
+
 **CSQL 인터프리터 종료(;EXit)**
 
 CSQL 인터프리터를 종료한다. ::
 
     csql> ;ex
+
+.. _scmd_clear:
 
 **질의 버퍼 초기화(;CLear)**
 
@@ -1435,6 +1474,8 @@ DBMS_OUTPUT 메시지 출력이 나중이니 주의하자. ::
 **;HISTORYRead** 세션 명령어를 사용해 지정된 **;HISTORYList** 에서 확인한 수행 번호에 해당하는 내용을 명령어 버퍼로 불러올 수 있다. 해당 SQL 문을 직접 입력한 것과 같은 상태이므로 바로 **;run** 또는 **;xrun** 를 입력할 수 있다. ::
 
     csql> ;historyread 1
+
+.. _scmd_edit:
 
 **기본 편집기를 호출(;EDIT)**
 
