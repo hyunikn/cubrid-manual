@@ -581,9 +581,9 @@ CSQL 인터프리터에서 작업 중인 데이터베이스 이름 및 호스트
     === Get Param Input ===
     isolation_level="tran_rep_class_commit_instance"
 
-**파라미터 값 설정(;SEt)**
+**파라미터 값 설정(;SET)**
 
-특정 파라미터의 값을 설정하기 위해서는 **;Set** 세션 명령어를 사용한다. 동적 변경이 가능한 파라미터만 값을 변경할 수 있으며, 서버 파라미터는 DBA 권한이 있어야만 값을 변경할 수 있다. 동적 변경이 가능한 파라미터 목록은 :ref:`broker-configuration` 를 참고한다. ::
+특정 파라미터의 값을 설정하기 위해서는 **;set** 세션 명령어를 사용한다. 동적 변경이 가능한 파라미터만 값을 변경할 수 있으며, 서버 파라미터는 DBA 권한이 있어야만 값을 변경할 수 있다. 동적 변경이 가능한 파라미터 목록은 :ref:`broker-configuration` 를 참고한다. ::
 
     csql> ;set block_ddl_statement=1
     === Set Param Input ===
@@ -1363,6 +1363,41 @@ OPT LEVEL의 상세한 내용은 :ref:`viewing-query-plan`\ 를 참고한다.
     csql> ;time ON
     csql> ;time
     TIME IS ON
+
+**서버 저장 메시지 출력(;SERver-output)**
+
+이 값을 ON으로 설정하면 서버의 DBMS_OUTPUT 버퍼에 저장된 메시지를 출력한다. 기본값은 OFF이다.
+DBMS_OUTPUT 버퍼는 주로 PL/CSQL 저장 프로시저/함수에서 DBMS_PUTPUT.put_line() 호출을 통해 쌓인 메시지들을 저장하고 있다.
+DBMS_OUTPUT 메시지는 CSQL이 실행한 SQL 문의 결과 출력에 뒤이어 '<DBMS_PUTPUT>' 이라는 표시 다음에 출력된다.
+특히, 실행 순서 상 DBMS_PUTPUT.put_line() 호출이 먼저이고 에러 발생이 나중이라도 실행 결과인 에러메시지가 먼저 출력되고
+DBMS_OUTPUT 메시지 출력이 나중이니 주의하자. ::
+
+    csql> ;server-output on
+    SERVER OUTPUT IS ON
+    csql>
+    csql> create or replace function late_message return integer as
+    csql> begin
+    csql>     DBMS_OUTPUT.put_line('Hello world');
+    csql>     return (1/0);   -- ZERO_DIVIDE exception
+    csql> end;
+    Execute OK. (0.024973 sec) Committed. (0.000000 sec)
+
+    1 command(s) successfully processed.
+    csql>
+    csql> select late_message() from dual;
+
+    In line 2, column 23,
+
+    ERROR: Stored procedure execute error:
+      (line 4, column 13) division by zero
+
+    <DBMS_OUTPUT>
+    ====
+    Hello world
+
+    0 command(s) successfully processed.
+    csql>
+
 
 **질의 결과를 칼럼 당 한 라인으로 출력(;LINe-output)**
 
