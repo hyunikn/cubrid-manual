@@ -34,9 +34,9 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 body 내부의 실행문들 중에 도달할 수 없는 것이 있을 때는 컴파일 과정에서 에러가 발생한다.
 다음은 도달할 수 없는 실행문이 있는 간단한 예이다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 저장 프로시저/함수는 Auto Commit 기능이 언제나 비활성화 된 상태로 실행된다.
 이는 호출한 세션에서 Auto Commit 기능이 활성화 되어 있어도 마찬가지이다.
@@ -145,9 +145,9 @@ SELECT 문의 INTO 절에 프로그램의 변수나 OUT 파라미터를 써서 �
 SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
 SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
@@ -157,9 +157,9 @@ Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 �
 단, 이들은 BOOLEAN이나 SYS_REFCURSOR 타입을 가져서는 안된다. :ref:`SQL 데이터타입 <datatype_index>`\이
 이들을 포함하지 않기 때문이다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
 다음은 Static SQL 사용예이다.
@@ -449,9 +449,9 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 != 연산의 결과는 = 연산 결과의 반대이다.
 다른 타입의 레코드에 =와 != 연산자를 사용했을 때는 컴파일 과정에서 에러가 발생한다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 다른 비교 연산자 <=>, <, >, <=, >= 들은 레코드 비교에 적용할 수 없다.
 
@@ -462,16 +462,16 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
 레코드 변수 사이에 대입이 가능하기 위해서 같은 순번의 필드 이름들끼리 같을 필요는 없다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 %ROWTYPE은 내부 프로시저/함수의 인자 타입과 리턴 타입으로 쓸 수 있다.
-그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL문에서 %ROWTYPE을 지원하지 않기 때문이다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL 문에서 %ROWTYPE을 지원하지 않기 때문이다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 쓸 수 있다.
 단, 이 때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
@@ -526,32 +526,32 @@ Static SQL UPDATE 문에도 다음과 같이 'SET ROW = <record>' 구문을 사�
 :ref:`PL/CSQL에서 지원하는 데이터 타입 <>` 중에 NUMERIC은 정밀도와 스케일을, CHAR와 VARCHAR는 길이를 지정할 수 있다.
 그러나, 저장 프로시저/함수의 인자타입과 리턴타입에는 예외적으로 정밀도와 스케일을 지정할 수 없다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 그리고, NUMERIC 타입에서 정밀도와 스케일이 생략되면 NUMERIC(15, 0)을 나타내지만,
 예외적으로 인자타입과 리턴타입에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다.
 또한, CHAR와 VARCHAR도 인자타입과 리턴타입에서는 다른 곳에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
 아니라 임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 인자타입과 리턴타입을 :ref:`%TYPE <percent_type>`\을 사용해서 지정했을 때에도 참조되는 원래 타입의
 정밀도, 스케일, 길이 지정은 무시되고 대신 임의의 정밀도, 스케일, 길이를 허용하는 것으로 동작한다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 단, 위 %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴타입에 %TYPE이 사용되고 참조되는 원래 타입이
 NUMERIC(p, s) 이면 원래 타입의 정밀도 p와 스케일 s가 유지된다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 
 
@@ -701,9 +701,9 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 * oracle_style_empty_string
 * timezone
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 위 4개 외 다른 설정은 Static/Dynamic SQL 밖의 PL/CSQL 문에서 유효하지 않다. 특히,
 
@@ -711,9 +711,9 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 * pipes_as_concat 설정 파라미터값과 상관없이 ||는 논리합(OR) 연산자로 사용되지 않는다.
 * plus_as_concat 설정 파라미터값과 상관없이 +는 문자열에 적용되었을 때 병합 연산자로 사용된다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 .. _decl:
 
@@ -1251,12 +1251,12 @@ RAISE_APPLICATION_ERROR는 원하는 :ref:`코드와 에러메시지 <sqlcode>`\
 일으키고자 할 때 사용한다.
 RAISE_APPLICATION_ERROR의 사용 형태는 Built-in 프로시저 호출처럼 보이지만 내부적으로는 PL/CSQL 실행문이다.
 첫번째 인자로 주는 코드는 1000보다 큰 INTEGER 값을 가져야 한다. 아니면, VALUE_ERROR Exception이 발생한다.
-1000 이하의 값은 시스템 built-in Exception을 위해 예약되어 있기 때문이다.
+1000 이하의 값은 시스템을 위해 예약되어 있기 때문이다.
 두번째 인자로 주는 에러메시지는 임의의 문자열이 가능하다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 .. _exec_imme:
 
@@ -1752,17 +1752,17 @@ PL/CSQL에서는 다음 두 가지 경우에 레코드 변수를 사용할 수 �
 호출되는 함수의 OUT 파라미터에 주어질 인자들은 호출 결과 변경이 일어나게 되므로
 대입이 가능한 변수나 다른 OUT 파라미터이어야 한다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 호출되는 함수는 저장 함수, 내부 함수, 빌트인 함수 이렇게 세 가지 종류이다.
 이 중에서 빌트인 함수는 :ref:`연산자와 함수 <operators-and-functions>` 장에 나열된 큐브리드 내장 함수들을 말한다.
 단, 빌트인 함수들 중에서 PL/CSQL 문법과 충돌을 일으키는 :ref:`IF <func_if>`\는 사용할 수 없다.
 
-..
-    (TODO) examples
-..
+.. code-block:: sql
+
+    -- TODO: example
 
 다른 저장 함수나 빌트인 함수 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
 
