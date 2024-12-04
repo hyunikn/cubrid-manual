@@ -101,6 +101,25 @@ body 내부의 실행문들 중에 도달할 수 없는 것이 있을 때는 컴
             RETURN -1;
     END;
 
+CREATE PROCEDURE/FUNCTION 문을 실행하면 저장 프로시저/함수의 문법과 실행의미에 관련된 각종 규칙들을 검사한다.
+검사에서 오류가 발견되면 오류의 위치와 원인을 설명하는 메시지를 클라이언트 응용 프로그램으로 전달한다.
+다음은 오류를 가지고 있는 저장 프로시저가 CSQL에서 에러를 발생시키는 예이다.
+
+.. code-block:: sql
+
+    csql> CREATE OR REPLACE PROCEDURE athlete_code(p_name VARCHAR) AS
+    csql> BEGIN
+    csql>     -- 오류: Static SQL SELECT 문은 INTO 절을 가져야 함
+    csql>     SELECT code
+    csql>     FROM athlete a
+    csql>     WHERE a.name = p_name;
+    csql> END;
+
+    ERROR: In line 4, column 5
+    Stored procedure compile error: SELECT statement must have an INTO clause
+
+    0 command(s) successfully processed.
+
 .. _static_sql:
 
 Static SQL
@@ -130,6 +149,9 @@ SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO �
     (TODO) examples
 ..
 
+SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
+
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
 프로그램에서 선언한 변수, 상수, 프로시저/함수 인자를 쓸 수 있다.
 단, 이들은 BOOLEAN이나 SYS_REFCURSOR 타입을 가져서는 안된다. :ref:`SQL 데이터타입 <datatype_index>`\이
@@ -140,6 +162,7 @@ Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 �
 ..
 
 SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
+다음은 Static SQL 사용예이다.
 
 .. code-block:: sql
 
@@ -183,26 +206,9 @@ SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_
         END LOOP;
     END;
 
+Static SQL 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
+
 .. _dyn_sql:
-
-CREATE PROCEDURE/FUNCTION 문을 실행하면 저장 프로시저/함수의 문법과 실행의미에 관련된 각종 규칙들을 검사한다.
-검사에서 오류가 발견되면 오류의 위치와 원인을 설명하는 메시지를 클라이언트 응용 프로그램으로 전달한다.
-다음은 오류를 가지고 있는 저장 프로시저가 CSQL에서 에러를 발생시키는 예이다.
-
-.. code-block:: sql
-
-    csql> CREATE OR REPLACE PROCEDURE athlete_code(p_name VARCHAR) AS
-    csql> BEGIN
-    csql>     -- 오류: Static SQL SELECT 문은 INTO 절을 가져야 함
-    csql>     SELECT code
-    csql>     FROM athlete a
-    csql>     WHERE a.name = p_name;
-    csql> END;
-
-    ERROR: In line 4, column 5
-    Stored procedure compile error: SELECT statement must have an INTO clause
-
-    0 command(s) successfully processed.
 
 Dynamic SQL
 ==================
@@ -1178,9 +1184,9 @@ COMMIT, ROLLBACK, TRUNCATE 문은 프로그램의 실행문으로서 직접 사�
     <open_for_statement> ::= OPEN <identifier> FOR <select_statement>
 
 * *cursor_expression*: 계산 결과로 커서나 SYS_REFCURSOR 변수를 갖는 표현식
-* *open_statement*: 커서를 연다. SYS_REFCURSOR 변수가 아닌 커서에 대해서만 사용가능함에 주의하자. 파라미터를 갖도록 선언된 커서에 대해서는 선언된 파라미터 갯수와 타입에 맞는 인자를 주면서 열어야 한다.
-* *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 파라미터에 대입한다. row 안의 컬럼 갯수는 지정된 변수나 OUT 파라미터 갯수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
-* *close_statement*: 커서를 닫는다.
+* *open_statement*: 커서를 연다. SYS_REFCURSOR 변수가 아닌 커서에 대해서만 사용가능함에 주의하자. 파라미터를 갖도록 선언된 커서에 대해서는 선언된 파라미터 갯수와 타입에 맞는 인자를 주면서 열어야 한다. 이미 열려 있는 커서를 다시 열려고 시도하면 CURSOR_ALREADY_OPEN Exception이 발생한다.
+* *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 파라미터에 대입한다. row 안의 컬럼 갯수는 지정된 변수나 OUT 파라미터 갯수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다. 열려 있지 않은 커서로부터 FETCH를 시도하면 INVALID_CURSOR Exception이 발생한다.
+* *close_statement*: 커서를 닫는다. 열려 있지 않은 커서를 닫으려고 시도하면 INVALID_CURSOR Exception이 발생한다.
 * *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다. *select_statement*\가 INTO 절을 포함하면 컴파일 과정에서 에러가 발생한다.
 
 다음은 OPEN, FETCH, CLOSE 문의 사용예이다.
@@ -1244,8 +1250,8 @@ RAISE_APPLICATION_ERROR
 RAISE_APPLICATION_ERROR는 원하는 :ref:`코드와 에러메시지 <sqlcode>`\로 :ref:`Excption <exception>`\을
 일으키고자 할 때 사용한다.
 RAISE_APPLICATION_ERROR의 사용 형태는 Built-in 프로시저 호출처럼 보이지만 내부적으로는 PL/CSQL 실행문이다.
-첫번째 인자로 주는 코드는 1000 이상의 INTEGER 값을 가져야 한다.
-999 이하의 값은 시스템 built-in Exception을 위해 예약되어 있기 때문이다.
+첫번째 인자로 주는 코드는 1000보다 큰 INTEGER 값을 가져야 한다. 아니면, VALUE_ERROR Exception이 발생한다.
+1000 이하의 값은 시스템 built-in Exception을 위해 예약되어 있기 때문이다.
 두번째 인자로 주는 에러메시지는 임의의 문자열이 가능하다.
 
 ..
@@ -1264,6 +1270,10 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 이 때 조회 결과 값들의 갯수는 INTO 절 안의 변수나 OUT 파라미터의 갯수와 일치해야 하고
 값들은 대응되는 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
 
+SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
+INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
+
 ::
 
     <execute_immediate> ::=
@@ -1277,7 +1287,7 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
   SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 갯수와 *using_clause*\에
   포함된 표현식의 갯수는 일치해야 한다.
 * *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다. BOOLEAN이나 SYS_REFCURSOR 타입을 갖는 표현식을 가질 수 없다. :ref:`%ROWTYPE <percent_rowtype>`\으로 선언된 레코드 타입 값이나 커서도 표현식 자리에 올 수 없다.
-* *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 파라미터를 지정한다.
+* *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 파라미터를 지정한다. *dynamic_sql*\이 SELECT문을 나타내는데 INTO 절이 없거나 *dynamic_sql*\이 SELECT문을 나타내지 않는데 INTO 절이 있으면 SQL_ERROR Exception이 발생한다.
 
 다음은 EXECUTE IMMEDIATE의 사용예이다.
 
@@ -1435,6 +1445,7 @@ RETURN
 인자 갯수와 각각의 타입은 해당 프로시저의 선언과 일치해야 한다.
 호출되는 프로시저의 OUT 파라미터에 주어질 인자들은 프로시저 호출 결과로 변경이 될 것이므로
 대입이 가능한 변수나 다른 OUT 파라미터이어야 한다.
+다른 저장 프로시저 실행에 문제가 있을 때는 SQL_ERROR Exception이 발생한다.
 
 IF
 ==
@@ -1473,7 +1484,7 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 다섯 가지 형태가 �
 
 * *label_declaration*: 오직 루프문 시작 부분에서만 라벨 선언을 할 수 있다. 이 라벨은 루프 바디 안 쪽의 CONTINUE 문이나 EXIT 문이 분기 기준이 될 루프를 지정하는데 사용된다.
 * *while-loop* 형태의 루프에서 조건 *expression*\은 BOOLEAN 타입이어야 한다.
-* *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER로 변환가능한 타입을 가져야 한다. step은 1보다 크거나 같아야 한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
+* *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER로 변환가능한 타입을 가져야 한다. 실행시간에 step 값이 0 이하이면 VALUE_ERROR Exception이 발생한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
 * *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 커서나 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 이 때 사용되는 SELECT 문에 INTO 절이 있으면 컴파일 과정에서 에러가 발생한다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
 
 다음은 For-Iterator Loop 구문의 사용예를 보여준다.
@@ -1653,9 +1664,11 @@ SQL%ROWCOUNT는 Static SQL을 실행한 직후에 결과 크기를 나타내는 
 %ISOPEN, %FOUND, %NOTFOUND, %ROWCOUNT 기호를 덧붙여 그 커서의 네 가지 속성을 조회할 수 있다.
 
 * %ISOPEN: 커서가 열려 있는지 여부 (BOOLEAN)
-* %FOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 1개의 ROW를 결과로 갖는지 여부 (BOOLEAN)
-* %NOTFOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 0개의 ROW를 결과로 갖는지 여부 (BOOLEAN)
-* %ROWCOUNT: 첫 번째 FETCH 이전이면 NULL. 아니면 현재까지 FETCH된 ROW의 갯수 (BIGINT)
+* %FOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 1개의 ROW를 결과로 갖는지 여부 (BOOLEAN). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
+* %NOTFOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 0개의 ROW를 결과로 갖는지 여부 (BOOLEAN). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
+* %ROWCOUNT: 첫 번째 FETCH 이전이면 NULL. 아니면 현재까지 FETCH된 ROW의 갯수 (BIGINT). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
+
+*cursor_expression*\의 계산 결과가 NULL이면 INVALID_CURSOR Exception이 발생한다.
 
 이항 연산, 단항 연산, 괄호
 ==========================
@@ -1750,6 +1763,8 @@ PL/CSQL에서는 다음 두 가지 경우에 레코드 변수를 사용할 수 �
 ..
     (TODO) examples
 ..
+
+다른 저장 함수나 빌트인 함수 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
 
 CASE 표현식
 =================
