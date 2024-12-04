@@ -6,6 +6,8 @@
 Overview
 *****************************
 
+.. _stored_proc:
+
 저장 프로시저/함수 생성
 ==============================
 
@@ -25,6 +27,16 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 위 문법에서 저장 프로시저/함수의 *body*\는 PL/CSQL 실행문들을 포함하고
 그 앞의 선언부 *seq_of_declare_specs*\는 실행문들 안에서 사용될 변수, 상수, Exception 등을 선언한다.
 이들 문법 요소에 대한 자세한 내용은 :ref:`선언문 <decl>`\과 :ref:`실행문 <stmt>` 절을 참고한다.
+
+저장 프로시저/함수는 :ref:`큐브리드 내장 함수 <operators-and-functions>`\와 동일한 이름을 가질 수 없다.
+동일한 이름으로 선언하면 컴파일 과정에서 (CREATE 문 실행 과정에서) 에러가 발생한다.
+
+body 내부의 실행문들 중에 도달할 수 없는 것이 있을 때는 컴파일 과정에서 에러가 발생한다.
+다음은 도달할 수 없는 실행문이 있는 간단한 예이다.
+
+..
+    (TODO) examples
+..
 
 저장 프로시저/함수는 Auto Commit 기능이 언제나 비활성화 된 상태로 실행된다.
 이는 호출한 세션에서 Auto Commit 기능이 활성화 되어 있어도 마찬가지이다.
@@ -109,6 +121,8 @@ SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_de
 
 
 SELECT 문의 INTO 절에 프로그램의 변수나 OUT 파라미터를 써서 조회 결과를 담을 수 있다.
+이 때 조회 결과 값들의 갯수는 INTO 절 안의 변수나 OUT 파라미터의 갯수와 일치해야 하고
+값들은 대응되는 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
 SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
 SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
 
@@ -117,7 +131,9 @@ SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO �
 ..
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
-프로그램에서 선언한 변수나 프로시저/함수 파라미터를 쓸 수 있다.
+프로그램에서 선언한 변수, 상수, 프로시저/함수 인자를 쓸 수 있다.
+단, 이들은 BOOLEAN이나 SYS_REFCURSOR 타입을 가져서는 안된다. :ref:`SQL 데이터타입 <datatype_index>`\이
+이들을 포함하지 않기 때문이다.
 
 ..
     (TODO) examples
@@ -384,6 +400,8 @@ ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일 해주�
    a_like a%TYPE;   -- 변수 a와 동일한 타입으로 변수 a_like 을 선언
    ...
 
+.. _percent_rowtype:
+
 %ROWTYPE
 ======================
 
@@ -570,7 +588,7 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 (참고: :ref:`Block 실행문 <block_stmt>`).
 사용자가 프로그램 선언부에서 자신만의 Exception을 정의하고 실행부에서 사용할 수 있다
 (참고: :ref:`Exception 선언 <exception_decl>`).
-그리고, 주요 예외 상황에 대해서는 다음과 같이 시스템 Exception들이 미리 정의되어 있다.
+그리고, 주요 에러 상황에 대해서는 다음과 같이 시스템 Exception들이 미리 정의되어 있다.
 
 
 +---------------------+---------+------------------------------------------------------------------+
@@ -715,6 +733,70 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
 선언 가능한 각 항목에 대한 설명은 아래 내용을 참고한다.
 
+:ref:`내부 프로시저/함수 선언 <local_routine_decl>`\과 :ref:`Block 실행문 <block_stmt>`\은
+자신만의 선언부와 실행부를 가지면서 중첩된 scope들을 이룬다.
+이 때 안쪽 scope 선언부에서 바깥에서 선언한 항목과 동일한 이름을 가진 다른 항목을 선언하면
+안쪽 scope에서 그 이름은 새로 정의한 항목을 가리키며 바깥쪽의 동일 이름은 가려진다.
+단, 안쪽 scope 밖에서 그 이름은 여전히 바깥 항목을 가리킨다.
+
+.. code-block:: sql
+
+    CREATE OR REPLACE PROCEDURE hidden_variable
+    AS
+        a INT := 3;
+        b VARCHAR(10);
+
+        -- 내부 프로시저
+        PROCEDURE inner_proc
+        AS
+            a INT := 5;
+            b FLOAT;
+        BEGIN
+            -- 여기서 a = 5, b는 FLOAT 타입
+        END;
+
+    BEGIN
+        -- 여기서 a = 3, b는 VARCHAR(10) 타입
+
+        -- Block 실행문
+        DECLARE
+            a INT := 7;
+            b DATETIME;
+        BEGIN
+            -- 여기서 a = 7, b는 DATETIME 타입
+        END;
+
+        -- 다시 a = 3, b는 VARCHAR(10) 타입
+    END;
+
+이러한 "이름 가림"은 다른 종류의 항목(상수, 프로시저/함수 파라미터, Exception, 커서, 내부 프로시저/함수)들에
+대해서도 마찬가지로 적용된다.
+
+단, 가려지는 항목이 동일 선언부 위쪽에서 다른 변수나 상수의 초기값 표현식에 사용되었다면 컴파일 과정에서 에러가 발생한다.
+다음은 그 간단한 예이다. 프로시저 poo의 인자 a를 내부 프로시저 inner 안에서 선언한 변수 i의 초기값으로 사용하고
+그 아래쪽에서 a 이름으로 다시 변수를 선언하였다. 이런 경우에는 '... already been used ... in the same declaration block'
+이라는 메시지의 에러가 발생한다.
+
+.. code-block:: sql
+
+    csql> create or replace procedure poo(a int) as
+    csql>
+    csql>     procedure inner as
+    csql>         i int := a;
+    csql>         a numeric;
+    csql>     begin
+    csql>         ...
+    csql>     end;
+    csql>
+    csql> begin
+    csql>     ...
+    csql> end;
+
+    ERROR: In line 5, column 9
+    Stored procedure compile error: name A has already been used at line 4 and column 18 in the same declaration block
+
+
+
 변수 선언
 =========
 
@@ -749,42 +831,6 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
         NULL;
     END;
 
-내부 프로시저/함수 선언이나 Block 실행문은 자신만의 선언부와 실행부를 가지면서 중첩된 scope을 이룬다.
-안쪽 scope에서 바깥에서 선언한 변수와 동일한 이름의 변수를 선언하면 안쪽에서는 바깥쪽의 동일 이름이 가려진다.
-이러한 "이름 가림"은 다른 종류의 이름(상수, 프로시저/함수 파라미터, Exception, 커서, 내부 프로시저/함수)들에
-대해서도 마찬가지로 적용된다.
-중첩된 scope에서 선언된  이름들은 그 scope이 끝나면 사라진다.
-
-.. code-block:: sql
-
-    CREATE OR REPLACE PROCEDURE hidden_variable
-    AS
-        a INT := 3;
-        b VARCHAR(10);
-
-        -- 내부 프로시저
-        PROCEDURE inner_proc
-        AS
-            a INT := 5;
-            b FLOAT;
-        BEGIN
-            -- 여기서 a = 5, b는 FLOAT 타입
-        END;
-
-    BEGIN
-        -- 여기서 a = 3, b는 VARCHAR(10) 타입
-
-        -- Block 실행문
-        DECLARE
-            a INT := 7;
-            b DATETIME;
-        BEGIN
-            -- 여기서 a = 7, b는 DATETIME 타입
-        END;
-
-        -- 다시 a = 3, b는 VARCHAR(10) 타입
-    END;
-
 상수 선언
 =========
 ::
@@ -803,6 +849,7 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 
 상수 선언에는 필수적으로 값 지정이 포함되어야 한다.
+NOT NULL 조건이 지정된 경우에 이 값은 NULL이 아니어야 한다.
 
 .. code-block:: sql
 
@@ -826,7 +873,7 @@ Exception 선언
         <identifier> EXCEPTION ;
 
 사용자가 원하는 이름의 Exception을 선언할 수 있다.
-이렇게 선언된 Exception을 :ref:`RAISE <raise>` 문과 예외처리의 :ref:`WHEN <block_stmt>` 구에서 사용할 수 있다.
+이렇게 선언된 Exception을 :ref:`RAISE <raise>` 문과 Exception 처리의 :ref:`WHEN <block_stmt>` 절에서 사용할 수 있다.
 
 .. code-block:: sql
 
@@ -915,6 +962,8 @@ Exception 선언
         END LOOP;
     END;
 
+커서를 선언할 때 사용하는 SELECT 문에는 INTO 절을 쓸 수 없다.
+
 .. _local_routine_decl:
 
 내부 프로시저/함수 선언
@@ -944,15 +993,20 @@ Exception 선언
     <seq_of_statements> ::= <statement> ; [ <statement> ; ... ]
     <seq_of_handlers> ::= <handler> [ <handler> ... ]
     <handler> ::= WHEN <exception_name> [ OR <exeption_name> OR ... ] THEN <seq_of_statements>
-    <exception_name> ::= OTHERS | identifier
+    <exception_name> ::= identifier | OTHERS
 
 * *parameter*: 파라미터는 IN, IN OUT, INOUT, OUT 네 가지 경우로 선언할 수 있다. IN OUT과 INOUT은 동일한 효과를 갖는다.
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
+* *label_name*: 프로시저/함수 이름과 일치해야 한다.
 * *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언 중 하나
 * *statement*: 아래 :ref:`실행문 <stmt>` 절 참조
 * *handler*: 지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
-* *exception_name*: OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.  OTHERS가 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
+* *exception_name*: Exception 이름 *identifier*\는 :ref:`시스템 Exception <exception>`\이거나 :ref:`사용자가 선언 <exception_decl>`\한 것이어야 한다. OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.
+
+내부 프로시저/함수는 :ref:`저장 프로시저/함수 <stored_proc>`\와 달리
+:ref:`큐브리드 내장 함수 <operators-and-functions>`\와 동일한 이름을 가질 수 있다.
+이 때 내장 함수는 내부 프로시저/함수가 선언된 scope 안에서 가려진다.
 
 함수의 경우에는  *body*\에서 RETURN 문으로 선언된 리턴타입에 맞는 값을 반환해야 한다.
 함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하는 실행경로가 존재하면 컴파일 과정에서 에러가 발생한다.
@@ -1050,7 +1104,7 @@ Exception 선언
 BLOCK
 =====
 BLOCK 문은 실행문들 중간에 중첩 scope을 만들어 그 안에서 새로운 변수, 상수 등을 선언하고 사용할 수 있게 한다.
-BLOCK은 프로시저/함수와 마찬가지로 예외처리 구조를 가질 수 있다.
+BLOCK은 프로시저/함수와 마찬가지로 Exception 처리 구조를 가질 수 있다.
 ::
 
     <block> ::=
@@ -1061,14 +1115,14 @@ BLOCK은 프로시저/함수와 마찬가지로 예외처리 구조를 가질 �
     <seq_of_statements> ::= <statement> ; [ <statement> ; ... ]
     <seq_of_handlers> ::= <handler> [ <handler> ... ]
     <handler> ::= WHEN <exception_name> [ OR <exeption_name> OR ... ] THEN <seq_of_statements>
-    <exception_name> ::= OTHERS | identifier
+    <exception_name> ::= identifier | OTHERS
 
 
 * *body*: 필수적으로 하나 이상의 실행문과 선택적으로 몇 개의 Exception 핸들러로 구성된다.
 * *declare_spec*: 변수, 상수, Exception, 커서, 내부 프로시저/함수 선언. (참조: :ref:`선언문 <decl>`)
 * *handler*:  지정된 Exception이 발생했을 때 실행할 실행문들을 지정한다.
-* *exception_name*: OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.
-    OTHERS 아닌 경우는 시스템 Exception이거나 사용자 정의 Exception을 나타낸다.
+* *exception_name*: Exception 이름 *identifier*\는 :ref:`시스템 Exception <exception>`\이거나 :ref:`사용자가 선언 <exception_decl>`\한 것이어야 한다. OTHERS는 아직까지 매치되지 않은 모든 Exception에 매치되며 OR로 다른 exception 이름과 연결할 수 없다.
+
 
 BLOCK 안에서 선언된 아이템들은 그 BLOCK을 벗어나면 참조할 수 없다.
 BLOCK에서 선언된 아이템이 바깥 scope에서 선언된 다른 아이템과 이름이 겹칠 경우
@@ -1117,17 +1171,17 @@ COMMIT, ROLLBACK, TRUNCATE 문은 프로그램의 실행문으로서 직접 사�
         | <close_statement>
         | <open_for_statement>
 
-    <open_statement> ::= OPEN <cursor_expression> [ <function_argument> ]
+    <open_statement> ::= OPEN <cursor> [ <function_argument> ]
     <fetch_statement> ::= FETCH <cursor_expression> INTO <identifier> [ , <identifier>, ... ]
     <close_statement> ::= CLOSE <cursor_expression>
 
     <open_for_statement> ::= OPEN <identifier> FOR <select_statement>
 
 * *cursor_expression*: 계산 결과로 커서나 SYS_REFCURSOR 변수를 갖는 표현식
-* *open_statement*: 커서를 연다. 파라미터를 갖도록 선언된 커서에 대해서는 선언된 파라미터 갯수와 타입에 맞는 인자를 주면서 열어야 한다.
+* *open_statement*: 커서를 연다. SYS_REFCURSOR 변수가 아닌 커서에 대해서만 사용가능함에 주의하자. 파라미터를 갖도록 선언된 커서에 대해서는 선언된 파라미터 갯수와 타입에 맞는 인자를 주면서 열어야 한다.
 * *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 파라미터에 대입한다. row 안의 컬럼 갯수는 지정된 변수나 OUT 파라미터 갯수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
 * *close_statement*: 커서를 닫는다.
-* *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다.
+* *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다. *select_statement*\가 INTO 절을 포함하면 컴파일 과정에서 에러가 발생한다.
 
 다음은 OPEN, FETCH, CLOSE 문의 사용예이다.
 
@@ -1190,7 +1244,7 @@ RAISE_APPLICATION_ERROR
 RAISE_APPLICATION_ERROR는 원하는 :ref:`코드와 에러메시지 <sqlcode>`\로 :ref:`Excption <exception>`\을
 일으키고자 할 때 사용한다.
 RAISE_APPLICATION_ERROR의 사용 형태는 Built-in 프로시저 호출처럼 보이지만 내부적으로는 PL/CSQL 실행문이다.
-첫번째 인자로 주는 코드는 1000 이상의 값을 가져야 한다.
+첫번째 인자로 주는 코드는 1000 이상의 INTEGER 값을 가져야 한다.
 999 이하의 값은 시스템 built-in Exception을 위해 예약되어 있기 때문이다.
 두번째 인자로 주는 에러메시지는 임의의 문자열이 가능하다.
 
@@ -1205,8 +1259,10 @@ EXECUTE IMMEDIATE
 
 :ref:`Dynamic SQL <dyn_sql>` 절에서 설명한 바와 같이
 실행 시간에 임의의 SQL을 문자열로 구성하여 EXECUTE IMMDIATE 문을 통해 실행할 수 있다.
-USING 절을 써서 프로그램의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하고,
+USING 절을 써서 프로그램의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하다.
 INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 파라미터에 담아오는 것도 가능하다.
+이 때 조회 결과 값들의 갯수는 INTO 절 안의 변수나 OUT 파라미터의 갯수와 일치해야 하고
+값들은 대응되는 변수나 OUT 파라미터에 대입 가능한 타입을 가져야 한다.
 
 ::
 
@@ -1220,7 +1276,7 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 * *dynamic_sql*: 문자열 타입을 갖는 표현식. 표현식은 SQL 규약에 맞는 SQL 구문 문자열을 계산 결과로 가져야 한다.
   SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 갯수와 *using_clause*\에
   포함된 표현식의 갯수는 일치해야 한다.
-* *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다.
+* *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다. BOOLEAN이나 SYS_REFCURSOR 타입을 갖는 표현식을 가질 수 없다. :ref:`%ROWTYPE <percent_rowtype>`\으로 선언된 레코드 타입 값이나 커서도 표현식 자리에 올 수 없다.
 * *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 파라미터를 지정한다.
 
 다음은 EXECUTE IMMEDIATE의 사용예이다.
@@ -1247,6 +1303,9 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 * *identifier*: 변수이거나 OUT 파라미터이어야 한다.
 * *expression*: 대입될 값을 계산하는 표현식. 아래 표현식 절 참조
 
+*expression*의 타입은 *identifier*의 타입과 같거나 *identifier*의 타입으로 형변환이 가능해야 한다.
+그렇지 않으면 컴파일 과정에서 에러가 발생한다.
+
 CONTINUE, EXIT
 ===============
 ::
@@ -1264,6 +1323,8 @@ CONTINUE와 EXIT 문은 루프문 안에서만 사용할 수 있다.
 CONTINUE 문은 아래쪽으로의 실행 흐름을 멈추고 루프의 처음으로 분기해서 다음 iteration을 실행하도록 한다.
 EXIT 문은 아래쪽으로의 실행 흐름을 멈추고 루프를 빠져나가 그 루프 다음 실행문으로 분기한다.
 *label_name*\이 없는 경우 그 CONTINUE/EXIT 문을 포함하는 가장 안쪽의 루프를 재시작한다/빠져나간다.
+*label_name*\이 있는 경우 그 CONTINUE/EXIT 문을 포함하는 루프들 중 하나에 선언된 것이어야 한다.
+아니면 컴파일 과정에서 에러가 발생한다.
 루프가 여럿 중첩된 경우 *label_name*\을 지정하여 분기할 루프를 지정할 수 있다.
 WHEN 절이 있는 경우 BOOLEAN 타입의 *expression*\이 TRUE로 계산될 경우에만 분기한다.
 
@@ -1322,7 +1383,9 @@ RAISE
         RAISE [ <identifier> ]
 
 Exception을 일으킨다.
-Exception 이름 *identifier*\가 생략되는 경우는 RAISE 문의 위치가 예외처리 구조의 THEN 절 안에 있을 때 뿐이다.
+Exception 이름 *identifier*\는 :ref:`시스템 Exception <exception>`\이거나
+:ref:`사용자가 선언 <exception_decl>`\한 것이어야 한다.
+Exception 이름이 생략되는 경우는 RAISE 문의 위치가 Exception 처리 구조의 THEN 절 안에 있을 때 뿐이다.
 이 경우, 현재 처리 중인 Exception을 일으키는 것으로 동작한다.
 
 .. code-block:: sql
@@ -1357,7 +1420,7 @@ RETURN
         RETURN [ <expression> ]
 
 현재 루틴을 호출한 호출문 다음으로 분기한다.
-현재 루틴이 함수인 경우에는 그 함수의 리턴 타입에 맞는 반환값 *expression*\을 지정해야 한다.
+현재 루틴이 함수인 경우에는 그 함수의 리턴 타입으로 변환 가능한 반환값 *expression*\을 지정해야 한다.
 현재 루틴이 함수가 아닌 프로시저인 경우에는 반환값을 지정하면 에러이다.
 
 프로시저 호출문
@@ -1383,6 +1446,7 @@ IF
     <else_part> ::= ELSE <seq_of_statements>
 
 일반적인 프로그래밍 언어가 제공하는 If-Then-Else 문을 제공한다.
+IF와 ELSIF 다음의 *expression*\는 BOOLEAN 타입이어야 한다.
 
 .. _loop:
 
@@ -1404,12 +1468,13 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 다섯 가지 형태가 �
 
     <iterator> ::= <identifier> IN [ REVERSE ] <lower_bound> .. <upper_bound> [ BY <step> ]
 
-    <for_cursor>      ::= <record> IN <cursor_expression> [ <function_argument> ]
+    <for_cursor>      ::= <record> IN <cursor> [ <function_argument> ]
     <for_static_sql>  ::= <record> IN ( <select_statement> )
 
 * *label_declaration*: 오직 루프문 시작 부분에서만 라벨 선언을 할 수 있다. 이 라벨은 루프 바디 안 쪽의 CONTINUE 문이나 EXIT 문이 분기 기준이 될 루프를 지정하는데 사용된다.
-* *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER 타입을 갖는다. step은 1보다 크거나 같아야 한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
-* *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
+* *while-loop* 형태의 루프에서 조건 *expression*\은 BOOLEAN 타입이어야 한다.
+* *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER로 변환가능한 타입을 가져야 한다. step은 1보다 크거나 같아야 한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
+* *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 커서나 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 이 때 사용되는 SELECT 문에 INTO 절이 있으면 컴파일 과정에서 에러가 발생한다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
 
 다음은 For-Iterator Loop 구문의 사용예를 보여준다.
 
@@ -1468,7 +1533,7 @@ CASE 문은 두 가지 형태가 있다.
 * 첫번째 형태는 CASE 키워드 직후에 표현식을 갖는다. 우선 이 최초 표현식을 계산한 다음, 이후 WHEN 절의 표현식을 하나씩 차례로 계산해서 최초 표현식과 일치하는 값을 찾고, 해당 THEN 절의 실행문들을 실행한다. 최초 표현식은 단 한번 계산된다.
 * 두번째 형태는 CASE 키워드 직후에 표현식을 갖지 않는다. CASE 키워드 이후 여러 개의 WHEN 절의 표현식은 BOOLEAN 타입을 가져야 한다. 이들 표현식을 하나씩 차례로 계산하다가 처음으로 TRUE 값이 되는 표현식이 발견되면 해당 THEN 절의 실행문을 실행한다.
 
-두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 실행할 실행문들을 지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때는 CASE_NOT_FOUND라는 시스템 예외가 발생한다.
+두 형태 모두 선택적으로 ELSE 절을 가질 수 있다. 이는 조건을 만족하는 WHEN 이후 표현식을 찾지 못했을 경우에 실행할 실행문들을 지정한다. 조건을 만족하는 WHEN 절이 없고 ELSE 절도 없을 때는 CASE_NOT_FOUND라는 시스템 Exception이 발생한다.
 
 다음은 첫 번째 형태의 CASE 문 예제이다.
 
@@ -1737,9 +1802,9 @@ CASE 표현식은 :ref:`CASE 실행문 <case_stmt>`\(Statement)과 마찬가지�
 SQLCODE, SQLERRM
 =================
 
-예외 처리 블럭 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 예외의 코드(INTEGER 타입)와
+Exception 처리 블럭 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 Exception의 코드(INTEGER 타입)와
 에러메시지(STRING 타입)를 나타낸다.
-예외 처리 블럭 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
+Exception 처리 블럭 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
 
 .. code-block:: sql
 
