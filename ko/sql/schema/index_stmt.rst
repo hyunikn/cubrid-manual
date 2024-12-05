@@ -254,7 +254,7 @@ DEDUPLICATE
  
 묵시적인 방법
 
-    SQL 구문에 명시적인 DEDUPLICATE 옵션 지정이 없는 경우에 *deduplicate level*\를 자동으로 지정해 주는 방식이다. 이 방식은 시스템 파라메터 **deduplicate_key_level** 설정값의 영향을 받는다.
+    SQL 구문에 명시적인 DEDUPLICATE 옵션 지정이 없는 경우에 *deduplicate level*\를 자동으로 지정해 주는 방식이다. 이 방식은 시스템 파라미터 **deduplicate_key_level** 설정값의 영향을 받는다.
     **deduplicate_key_level**\이 1 이상이면 *deduplicate level*\은 자동으로  **deduplicate_key_level**\값으로 지정된다.    
 
 명시적인 방법

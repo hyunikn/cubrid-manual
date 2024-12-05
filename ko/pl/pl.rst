@@ -692,7 +692,7 @@ CSQL에서 athlete 테이블에 존재하지 않는 이름을 인자로 주어 N
 서버 설정 적용
 ==========================
 
-Static/Dynamic SQL 문의 동작은 :ref:`서버 설정 파라메터 <system_config>` 전체의 영향을 동일하게 받는다.
+Static/Dynamic SQL 문의 동작은 :ref:`서버 설정 파라미터 <system_config>` 전체의 영향을 동일하게 받는다.
 
 Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파라미터만이 유효하다.
 
