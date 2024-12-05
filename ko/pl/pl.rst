@@ -140,7 +140,7 @@ SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_de
 
 
 SELECT 문의 INTO 절에 프로그램의 변수나 OUT 인자를 써서 조회 결과를 담을 수 있다.
-이 때 조회 결과 값들의 갯수는 INTO 절 안의 변수나 OUT 인자의 갯수와 일치해야 하고
+이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
 SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
@@ -457,7 +457,7 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
 한 레코드 변수 s로부터 다른 레코드 변수 t로의 대입이 다음 경우에 가능하다.
 
-* s와 t의 필드 갯수가 같다.
+* s와 t의 필드 개수가 같다.
 * 각각의 필드 순번 i에 대해서, s와 t의 i번째 필드들의 타입을 S\ :sub:`i`\와 T\ :sub:`i`\라고 할 때, S\ :sub:`i`\에서 T\ :sub:`i`\로 대입 가능하다.
 
 레코드 변수 사이에 대입이 가능하기 위해서 같은 순번의 필드 이름들끼리 같을 필요는 없다.
@@ -475,7 +475,7 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
 Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 쓸 수 있다.
 단, 이 때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
-그리고, 조회 결과를 이루는 컬럼들과 레코드 필드들의 갯수가 같아야 한다.
+그리고, 조회 결과를 이루는 컬럼들과 레코드 필드들의 개수가 같아야 한다.
 이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 컬럼 타입으로부터 필드 타입으로 대입 가능해야 한다.
 
 .. code-block:: sql
@@ -496,7 +496,7 @@ Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 �
 
 Static SQL INSERT/REPLACE 문의 VALUES 절에 레코드 변수를 쓸 수 있다.
 단, 이 때 VALUES 절 안에 다른 변수를 함께 쓸 수 없다.
-그리고, 대입되는 테이블 컬럼들과 레코드 필드들의 갯수가 같아야 한다.
+그리고, 대입되는 테이블 컬럼들과 레코드 필드들의 개수가 같아야 한다.
 이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 필드 타입으로부터 컬럼 타입으로 대입 가능해야 한다.
 
 .. code-block:: sql
@@ -927,7 +927,7 @@ Exception 선언
 
 커서에도 프로시저/함수와 유사하게 인자를 선언할 수 있지만 오직 IN 인자만 선언할 수 있다는 차이가 있다.
 이 인자를 *select_statement* 문 안에서 참조할 수 있다.
-커서를 :ref:`OPEN <cursor_manipulation>` 할 때 이 인자에 실제 선언된 갯수와 타입이 일치하도록
+커서를 :ref:`OPEN <cursor_manipulation>` 할 때 이 인자에 실제 선언된 개수와 타입이 일치하도록
 인자값을 채워 해당 SELECT 문을 실행한다.
 
 .. code-block:: sql
@@ -1184,8 +1184,8 @@ COMMIT, ROLLBACK, TRUNCATE 문은 프로그램의 실행문으로서 직접 사�
     <open_for_statement> ::= OPEN <identifier> FOR <select_statement>
 
 * *cursor_expression*: 계산 결과로 커서나 SYS_REFCURSOR 변수를 갖는 표현식
-* *open_statement*: 커서를 연다. SYS_REFCURSOR 변수가 아닌 커서에 대해서만 사용가능함에 주의하자. 인자를 갖도록 선언된 커서에 대해서는 선언된 인자 갯수와 타입에 맞는 값을 주면서 열어야 한다. 이미 열려 있는 커서를 다시 열려고 시도하면 CURSOR_ALREADY_OPEN Exception이 발생한다.
-* *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 인자에 대입한다. row 안의 컬럼 갯수는 지정된 변수나 OUT 인자 갯수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다. 열려 있지 않은 커서로부터 FETCH를 시도하면 INVALID_CURSOR Exception이 발생한다.
+* *open_statement*: 커서를 연다. SYS_REFCURSOR 변수가 아닌 커서에 대해서만 사용가능함에 주의하자. 인자를 갖도록 선언된 커서에 대해서는 선언된 인자 개수와 타입에 맞는 값을 주면서 열어야 한다. 이미 열려 있는 커서를 다시 열려고 시도하면 CURSOR_ALREADY_OPEN Exception이 발생한다.
+* *fetch_statement*: 커서로부터 하나의 row를 가져와 지정된 변수나 OUT 인자에 대입한다. row 안의 컬럼 개수는 지정된 변수나 OUT 인자 개수와 일치해야 하고 각각의 컬럼값은 해당 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다. 열려 있지 않은 커서로부터 FETCH를 시도하면 INVALID_CURSOR Exception이 발생한다.
 * *close_statement*: 커서를 닫는다. 열려 있지 않은 커서를 닫으려고 시도하면 INVALID_CURSOR Exception이 발생한다.
 * *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다. *select_statement*\가 INTO 절을 포함하면 컴파일 과정에서 에러가 발생한다.
 
@@ -1267,7 +1267,7 @@ EXECUTE IMMEDIATE
 실행 시간에 임의의 SQL을 문자열로 구성하여 EXECUTE IMMDIATE 문을 통해 실행할 수 있다.
 USING 절을 써서 프로그램의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하다.
 INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 인자에 담아오는 것도 가능하다.
-이 때 조회 결과 값들의 갯수는 INTO 절 안의 변수나 OUT 인자의 갯수와 일치해야 하고
+이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 
 SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
@@ -1284,8 +1284,8 @@ INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단
 
 
 * *dynamic_sql*: 문자열 타입을 갖는 표현식. 표현식은 SQL 규약에 맞는 SQL 구문 문자열을 계산 결과로 가져야 한다.
-  SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 갯수와 *using_clause*\에
-  포함된 표현식의 갯수는 일치해야 한다.
+  SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 개수와 *using_clause*\에
+  포함된 표현식의 개수는 일치해야 한다.
 * *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다. BOOLEAN이나 SYS_REFCURSOR 타입을 갖는 표현식을 가질 수 없다. :ref:`%ROWTYPE <percent_rowtype>`\으로 선언된 레코드 타입 값이나 커서도 표현식 자리에 올 수 없다.
 * *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 인자를 지정한다. *dynamic_sql*\이 SELECT문을 나타내는데 INTO 절이 없거나 *dynamic_sql*\이 SELECT문을 나타내지 않는데 INTO 절이 있으면 SQL_ERROR Exception이 발생한다.
 
@@ -1442,7 +1442,7 @@ RETURN
     <function_argument> ::= ( [ <expression> [ , <expression>, ... ] ] )
 
 이름 *identifier*\로 지정된 프로시저를 인자 *function_argument*\를 주어 호출한다.
-인자 갯수와 각각의 타입은 해당 프로시저의 선언과 일치해야 한다.
+인자 개수와 각각의 타입은 해당 프로시저의 선언과 일치해야 한다.
 호출되는 프로시저의 OUT 인자에 주어질 인자들은 프로시저 호출 결과로 변경이 될 것이므로
 대입이 가능한 변수나 다른 OUT 인자이어야 한다.
 다른 저장 프로시저 실행에 문제가 있을 때는 SQL_ERROR Exception이 발생한다.
@@ -1654,7 +1654,7 @@ Static SQL 결과 크기
 SQL%ROWCOUNT는 Static SQL을 실행한 직후에 결과 크기를 나타내는 표현식이다.
 
 * 커서와 연관되지 않은 SELECT 문의 경우 반드시 INTO 절을 포함하게 되고 조회 결과는 1개이어야 한다. 따라서, 이 SELECT 문이 정상적으로 수행되었을 때 SQL%ROWCOUNT의 값은 1이다. 조회 결과 크기가 0이거나 1을 초과해서 실행시간 에러가 발생했을 때에는 SQL%ROWCOUNT의 값은 정의되지 않는다.
-* INSERT, UPDATE, DELETE, MERGE, REPLACE, TRUNCATE 문의 경우 영향 받은 레코드 갯수가 된다.
+* INSERT, UPDATE, DELETE, MERGE, REPLACE, TRUNCATE 문의 경우 영향 받은 레코드 개수가 된다.
 * COMMIT, ROLLBACK 문에 대해서는 0이 된다.
 
 커서 속성
@@ -1666,7 +1666,7 @@ SQL%ROWCOUNT는 Static SQL을 실행한 직후에 결과 크기를 나타내는 
 * %ISOPEN: 커서가 열려 있는지 여부 (BOOLEAN)
 * %FOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 1개의 ROW를 결과로 갖는지 여부 (BOOLEAN). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
 * %NOTFOUND: 첫 번째 FETCH 이전이면 NULL. 아니면 마지막 FETCH가 0개의 ROW를 결과로 갖는지 여부 (BOOLEAN). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
-* %ROWCOUNT: 첫 번째 FETCH 이전이면 NULL. 아니면 현재까지 FETCH된 ROW의 갯수 (BIGINT). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
+* %ROWCOUNT: 첫 번째 FETCH 이전이면 NULL. 아니면 현재까지 FETCH된 ROW의 개수 (BIGINT). 열려 있지 않은 커서에 대해서 조회하면 INVALID_CURSOR Exception 발생.
 
 *cursor_expression*\의 계산 결과가 NULL이면 INVALID_CURSOR Exception이 발생한다.
 
@@ -1748,7 +1748,7 @@ PL/CSQL에서는 다음 두 가지 경우에 레코드 변수를 사용할 수 �
 함수 호출
 =================
 
-함수 호출 표현식에서 인자 갯수와 각각의 타입은 해당 함수의 선언과 일치해야 한다.
+함수 호출 표현식에서 인자 개수와 각각의 타입은 해당 함수의 선언과 일치해야 한다.
 호출되는 함수의 OUT 인자에 주어질 인자들은 호출 결과 변경이 일어나게 되므로
 대입이 가능한 변수나 다른 OUT 인자이어야 한다.
 
