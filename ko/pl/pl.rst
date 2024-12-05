@@ -140,7 +140,7 @@ SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_de
 
 
 SELECT 문의 INTO 절에 프로그램의 변수나 OUT 인자를 써서 조회 결과를 담을 수 있다.
-이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
+이때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
 SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
@@ -427,7 +427,7 @@ ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일 해주�
 r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각 INT, CHAR, VARCHAR 타입을 갖는다.
 
 커서 이름 뒤에도 %ROWTYPE을 덧붙일 수 있다.
-이 때는 커서 정의에 주어진 SELECT 문의 결과에 해당하는 레코드 타입을 나타내게 된다.
+이때는 커서 정의에 주어진 SELECT 문의 결과에 해당하는 레코드 타입을 나타내게 된다.
 
 .. code-block:: sql
 
@@ -474,9 +474,9 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
     -- TODO: example
 
 Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 쓸 수 있다.
-단, 이 때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
+단, 이때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
 그리고, 조회 결과를 이루는 컬럼들과 레코드 필드들의 개수가 같아야 한다.
-이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 컬럼 타입으로부터 필드 타입으로 대입 가능해야 한다.
+이때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 컬럼 타입으로부터 필드 타입으로 대입 가능해야 한다.
 
 .. code-block:: sql
 
@@ -495,16 +495,16 @@ Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 �
    FETCH c INTO part;
 
 Static SQL INSERT/REPLACE 문의 VALUES 절에 레코드 변수를 쓸 수 있다.
-단, 이 때 VALUES 절 안에 다른 변수를 함께 쓸 수 없다.
+단, 이때 VALUES 절 안에 다른 변수를 함께 쓸 수 없다.
 그리고, 대입되는 테이블 컬럼들과 레코드 필드들의 개수가 같아야 한다.
-이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 필드 타입으로부터 컬럼 타입으로 대입 가능해야 한다.
+이때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 필드 타입으로부터 컬럼 타입으로 대입 가능해야 한다.
 
 .. code-block:: sql
 
    INSERT INTO tbl VALUES whole;
    INSERT INTO tbl(a, b) VALUES part;
 
-이 때 다음과 같은 형태도 가능하다.
+이때 다음과 같은 형태도 가능하다.
 
 .. code-block:: sql
 
@@ -741,7 +741,7 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
 :ref:`내부 프로시저/함수 선언 <local_routine_decl>`\과 :ref:`Block 실행문 <block_stmt>`\은
 자신만의 선언부와 실행부를 가지면서 중첩된 scope들을 이룬다.
-이 때 안쪽 scope 선언부에서 바깥에서 선언한 항목과 동일한 이름을 가진 다른 항목을 선언하면
+이때 안쪽 scope 선언부에서 바깥에서 선언한 항목과 동일한 이름을 가진 다른 항목을 선언하면
 안쪽 scope에서 그 이름은 새로 정의한 항목을 가리키며 바깥쪽의 동일 이름은 가려진다.
 단, 안쪽 scope 밖에서 그 이름은 여전히 바깥 항목을 가리킨다.
 
@@ -1012,7 +1012,7 @@ Exception 선언
 
 내부 프로시저/함수는 :ref:`저장 프로시저/함수 <stored_proc>`\와 달리
 :ref:`큐브리드 내장 함수 <operators-and-functions>`\와 동일한 이름을 가질 수 있다.
-이 때 내장 함수는 내부 프로시저/함수가 선언된 scope 안에서 가려진다.
+이때 내장 함수는 내부 프로시저/함수가 선언된 scope 안에서 가려진다.
 
 함수의 경우에는  *body*\에서 RETURN 문으로 선언된 리턴타입에 맞는 값을 반환해야 한다.
 함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하는 실행경로가 존재하면 컴파일 과정에서 에러가 발생한다.
@@ -1267,7 +1267,7 @@ EXECUTE IMMEDIATE
 실행 시간에 임의의 SQL을 문자열로 구성하여 EXECUTE IMMDIATE 문을 통해 실행할 수 있다.
 USING 절을 써서 프로그램의 어떤 값을 SQL문의 호스트 변수 자리에 채우는 것이 가능하다.
 INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 인자에 담아오는 것도 가능하다.
-이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
+이때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 
 SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
@@ -1485,7 +1485,7 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 다섯 가지 형태가 �
 * *label_declaration*: 오직 루프문 시작 부분에서만 라벨 선언을 할 수 있다. 이 라벨은 루프 바디 안 쪽의 CONTINUE 문이나 EXIT 문이 분기 기준이 될 루프를 지정하는데 사용된다.
 * *while-loop* 형태의 루프에서 조건 *expression*\은 BOOLEAN 타입이어야 한다.
 * *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER로 변환가능한 타입을 가져야 한다. 실행시간에 step 값이 0 이하이면 VALUE_ERROR Exception이 발생한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
-* *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 커서나 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 이 때 사용되는 SELECT 문에 INTO 절이 있으면 컴파일 과정에서 에러가 발생한다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이 때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
+* *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 커서나 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 이때 사용되는 SELECT 문에 INTO 절이 있으면 컴파일 과정에서 에러가 발생한다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
 
 다음은 For-Iterator Loop 구문의 사용예를 보여준다.
 

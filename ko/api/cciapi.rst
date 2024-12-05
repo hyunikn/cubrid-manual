@@ -1050,7 +1050,7 @@ cci_datasource_change_property
     default_isolation         string      :c:func:`cci_property_set`\의  isolation level. 기본값은 cubrid.conf의 isolation_level이며, 
                                           표 참고                        이 값의 기본값은 "READ_COMMITTED"임.
     login_timeout             msec        숫자                           login timeout.  기본값은 0(무한대기)임. prepare 또는 execute 함수 호출 시 내부적으로 재접속이 
-                                                                         발생할 수 있으며, 이 때에도 사용됨.
+                                                                         발생할 수 있으며, 이때에도 사용됨.
     ========================= =========== ============================== ===========================================================================================================
 
     **예제**

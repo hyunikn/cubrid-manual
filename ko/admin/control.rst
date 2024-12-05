@@ -1676,7 +1676,7 @@ QUERY_EDITOR 브로커는 다음과 같은 응용의 접속 요청만을 허용�
     % cubrid broker on broker1
     Cannot open shared memory
 
-*broker1*\만 종료하기 위하여 다음과 같이 입력한다. 이 때, *broker1*\의 서비스 풀을 함께 제거할 수 있다.
+*broker1*\만 종료하기 위하여 다음과 같이 입력한다. 이때, *broker1*\의 서비스 풀을 함께 제거할 수 있다.
 
 ::
 
@@ -2151,7 +2151,7 @@ ACCESS_LOG_MAX_SIZE 파라미터를 통해 ACCESS_LOG 파일의 최대 크기 �
 SQL 로그 관리
 ^^^^^^^^^^^^^
 
-SQL 로그 파일은 응용 클라이언트가 요청하는 SQL을 기록하며, *<broker_name>_<app_server_num>*.sql.log라는 이름으로 저장된다. SQL 로그는 **SQL_LOG** 파라미터 값이  ON인 경우에 설치 디렉터리의 log/broker/sql_log 디렉터리에 생성된다. 이 때, 생성되는 SQL 로그 파일의 크기는 **SQL_LOG_MAX_SIZE** 파라미터의 설정값을 초과할 수 없으므로 주의한다. CUBRID는 SQL 로그를 관리하기 위한 유틸리티로서 **broker_log_top**, **cubrid_replay**\ 를 제공하며, 이 유틸리티는 SQL 로그가 존재하는 디렉터리에서 실행해야 한다.
+SQL 로그 파일은 응용 클라이언트가 요청하는 SQL을 기록하며, *<broker_name>_<app_server_num>*.sql.log라는 이름으로 저장된다. SQL 로그는 **SQL_LOG** 파라미터 값이  ON인 경우에 설치 디렉터리의 log/broker/sql_log 디렉터리에 생성된다. 이때, 생성되는 SQL 로그 파일의 크기는 **SQL_LOG_MAX_SIZE** 파라미터의 설정값을 초과할 수 없으므로 주의한다. CUBRID는 SQL 로그를 관리하기 위한 유틸리티로서 **broker_log_top**, **cubrid_replay**\ 를 제공하며, 이 유틸리티는 SQL 로그가 존재하는 디렉터리에서 실행해야 한다.
 
 다음은 SQL 로그 파일의 예제와 설명이다.
 
