@@ -79,7 +79,7 @@ Visual Studio .NET에서 대화 상자에 접근하기 위해, "도구" 메뉴�
 
 *   먼저 임의의 텍스트 파일을 만들고 확장자를 .udl로 변경한다(1.txt -> 1.udl). 다음으로, 1.udl을 클릭하면 아래의 대화 상자가 팝업된다.
 
-    이 때, 공급자(Provider)를 CUBRID OLE DB Provider로 변경한다.
+    이때, 공급자(Provider)를 CUBRID OLE DB Provider로 변경한다.
 
    .. image:: /images/oledb_confbox.jpg
 

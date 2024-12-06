@@ -133,7 +133,7 @@ cub_gateway는 CUBRID Database Server와 cub_cas_cgw 사이의 연결을 중개�
 CUBRID 서비스 시작시 게이트웨이 함께 시작
 ----------------------------------------------
 
-CUBRID 서비스 시작(**cubrid service start**) 시 *게이트웨* 를 같이 시작되게 하려면, **cubrid.conf** 파일의 **service** 파라메터에 *gateway* 를 설정한다. ::
+CUBRID 서비스 시작(**cubrid service start**) 시 *게이트웨* 를 같이 시작되게 하려면, **cubrid.conf** 파일의 **service** 파라미터에 *gateway* 를 설정한다. ::
 
     # cubrid.conf
 
@@ -167,7 +167,7 @@ CUBRID DBLink를 사용하기 위한 설정은 동일기종 DBLink와 이기종 
 게이트웨이 설정 파일
 ------------------------------------------------
 
-CUBRID 설치 시 생성되는 기본 게이트웨이 설정 파일인 cubrid_gataway.conf 에서 사용되는 파라메터는 브로커 파라메터와 거의 동일 하며, 추가로 반드시 변경해야 할 일부 파라메터가 포함된다. 기본으로 포함되지 않는 파라메터의 값은 직접 추가/편집해서 사용하면 된다. 다음은 설치 시 기본으로 제공되는 cubrid_gateway.conf 파일 내용이다.
+CUBRID 설치 시 생성되는 기본 게이트웨이 설정 파일인 cubrid_gataway.conf 에서 사용되는 파라미터는 브로커 파라미터와 거의 동일 하며, 추가로 반드시 변경해야 할 일부 파라미터가 포함된다. 기본으로 포함되지 않는 파라미터의 값은 직접 추가/편집해서 사용하면 된다. 다음은 설치 시 기본으로 제공되는 cubrid_gateway.conf 파일 내용이다.
 
 
 
@@ -244,12 +244,12 @@ CUBRID 설치 시 생성되는 기본 게이트웨이 설정 파일인 cubrid_ga
 	CGW_LINK_ODBC_DRIVER_NAME   =MariaDB_ODBC_Driver
 	CGW_LINK_CONNECT_URL_PROPERTY       =
 
-게이트웨이 파라메터
+게이트웨이 파라미터
 ------------------------
 
-이기종 데이터 베이스와 DBLink를 사용하기 위해서 설정하는 파라메터이다.
+이기종 데이터 베이스와 DBLink를 사용하기 위해서 설정하는 파라미터이다.
 
-각각의 파라메터 의미는 이기종 데이터베이스 별로 약간 차이가 있다.
+각각의 파라미터 의미는 이기종 데이터베이스 별로 약간 차이가 있다.
 
 
 +-------------------------------+-------------+------------------------------------------------------------+
@@ -284,7 +284,7 @@ CUBRID 설치 시 생성되는 기본 게이트웨이 설정 파일인 cubrid_ga
 
 .. note::
     
-    *   Oracle인 경우, tnsnames.ora의 net_service_name을 이용하므로 해당 파라메터는 사용하지 않는다.
+    *   Oracle인 경우, tnsnames.ora의 net_service_name을 이용하므로 해당 파라미터는 사용하지 않는다.
     *   자세한 내용은 :ref:`Oracle Database에 연결을 위한 연결정보 설정 <tnsnames-info>`\ 을 참고한다.
         
 
@@ -294,7 +294,7 @@ CUBRID 설치 시 생성되는 기본 게이트웨이 설정 파일인 cubrid_ga
 	
 .. note::
 
-    *   Oracle인 경우, tnsnames.ora의 net_service_name을 이용하므로 해당 파라메터는 사용하지 않는다.
+    *   Oracle인 경우, tnsnames.ora의 net_service_name을 이용하므로 해당 파라미터는 사용하지 않는다.
     *   자세한 내용은 :ref:`Oracle Database에 연결을 위한 연결정보 설정 <tnsnames-info>`\ 을 참고한다.
 
 
