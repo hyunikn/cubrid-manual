@@ -149,7 +149,7 @@ SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO �
 
     -- TODO: example
 
-SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
@@ -621,7 +621,7 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 | ZERO_DIVIDE         | 9       | 0으로 나누기 시도                                                |
 +---------------------+---------+------------------------------------------------------------------+
 
-위에서 각 Exception의 SQLCODE는 :ref:`OTHERS Exception 핸들러 블럭 <block_stmt>` 안에서
+위에서 각 Exception의 SQLCODE는 :ref:`OTHERS Exception 핸들러 block <block_stmt>` 안에서
 Exception의 종류를 식별하는데 사용할 수 있다.
 
 * 999 이하의 SQLCODE 값들은 시스템 Exception을 위해서 예약되어 있다.
@@ -1271,7 +1271,7 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 
 SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
-INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
 
 ::
@@ -1817,9 +1817,9 @@ CASE 표현식은 :ref:`CASE 실행문 <case_stmt>`\(Statement)과 마찬가지�
 SQLCODE, SQLERRM
 =================
 
-Exception 처리 블럭 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 Exception의 코드(INTEGER 타입)와
+Exception 처리 block 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 Exception의 코드(INTEGER 타입)와
 에러메시지(STRING 타입)를 나타낸다.
-Exception 처리 블럭 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
+Exception 처리 block 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
 
 .. code-block:: sql
 
