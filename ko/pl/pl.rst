@@ -149,7 +149,7 @@ SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO �
 
     -- TODO: example
 
-SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
@@ -162,7 +162,7 @@ Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 �
     -- TODO: example
 
 SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
-다음은 Static SQL 사용예이다.
+다음은 Static SQL 사용 예이다.
 
 .. code-block:: sql
 
@@ -327,13 +327,13 @@ Static/Dynamic SQL에서는 SQL에서 제공하는 모든 :ref:`데이터 타입
 BOOLEAN, SYS_REFCURSOR와 SQL에서 제공하는 데이터 타입 중 일부이다.
 
 * BOOLEAN: TRUE, FALSE, NULL을 값으로 가질 수 있다.
-  CREATE PROCEDURE/FUNCTION 문에서 인자타입이나 리턴타입으로 BOOLEAN을 사용할 수는 없다.
+  CREATE PROCEDURE/FUNCTION 문에서 인자 타입이나 리턴 타입으로 BOOLEAN을 사용할 수는 없다.
   왜냐하면 SQL에 BOOLEAN 타입이 정의되어 있지 않기 때문이다.
-  단, :ref:`내부 프로시저/함수 <local_routine_decl>`\를 선언할 때에는 인자타입이나 리턴타입으로
+  단, :ref:`내부 프로시저/함수 <local_routine_decl>`\를 선언할 때에는 인자 타입이나 리턴 타입으로
   BOOLEAN을 사용할 수 있다.
 * SYS_REFCURSOR: 커서 변수를 선언할 때 사용한다.
   커서 변수의 용도는 :ref:`OPEN-FOR <cursor_manipulation>` 문을 참고한다.
-  BOOLEAN과 마찬가지로 CREATE PROCEDURE/FUNCTION 문에서 인자타입이나 리턴타입으로 SYS_REFCURSOR를 사용할 수 없고
+  BOOLEAN과 마찬가지로 CREATE PROCEDURE/FUNCTION 문에서 인자 타입이나 리턴 타입으로 SYS_REFCURSOR를 사용할 수 없고
   :ref:`내부 프로시저/함수 <local_routine_decl>`\에는 사용할 수 있다.
 
 SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 지원하지 않는 것은 다음과 같다.
@@ -466,8 +466,8 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
     -- TODO: example
 
-%ROWTYPE은 내부 프로시저/함수의 인자타입과 리턴타입으로 쓸 수 있다.
-그러나, 저장 프로시저/함수의 인자타입과 리턴타입으로는 쓸 수 없다. SQL 문에서 %ROWTYPE을 지원하지 않기 때문이다.
+%ROWTYPE은 내부 프로시저/함수의 인자 타입과 리턴 타입으로 쓸 수 있다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL 문에서 %ROWTYPE을 지원하지 않기 때문이다.
 
 .. code-block:: sql
 
@@ -523,30 +523,31 @@ Static SQL UPDATE 문에도 다음과 같이 'SET ROW = <record>' 구문을 사�
 정밀도와 스케일 지정 예외
 ==============================
 
-:ref:`PL/CSQL에서 지원하는 데이터 타입 <>` 중에 NUMERIC은 정밀도와 스케일을, CHAR와 VARCHAR는 길이를 지정할 수 있다.
-그러나, 저장 프로시저/함수의 인자타입과 리턴타입에는 예외적으로 정밀도와 스케일을 지정할 수 없다.
+:ref:`PL/CSQL에서 지원하는 데이터 타입 <datatype_index>` 중에 NUMERIC은 정밀도와 스케일을,
+CHAR와 VARCHAR는 길이를 지정할 수 있다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입에는 예외적으로 정밀도와 스케일을 지정이 허용되지 않는다.
 
 .. code-block:: sql
 
     -- TODO: example
 
 그리고, NUMERIC 타입에서 정밀도와 스케일이 생략되면 NUMERIC(15, 0)을 나타내지만,
-예외적으로 인자타입과 리턴타입에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다.
-또한, CHAR와 VARCHAR도 인자타입과 리턴타입에서는 다른 곳에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
+예외적으로 인자 타입과 리턴 타입에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다.
+또한, CHAR와 VARCHAR도 인자 타입과 리턴 타입에서는 다른 곳에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
 아니라 임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다.
 
 .. code-block:: sql
 
     -- TODO: example
 
-인자타입과 리턴타입을 :ref:`%TYPE <percent_type>`\을 사용해서 지정했을 때에도 참조되는 원래 타입의
+인자 타입과 리턴 타입을 :ref:`%TYPE <percent_type>`\을 사용해서 지정했을 때에도 참조되는 원래 타입의
 정밀도, 스케일, 길이 지정은 무시되고 대신 임의의 정밀도, 스케일, 길이를 허용하는 것으로 동작한다.
 
 .. code-block:: sql
 
     -- TODO: example
 
-단, 위 %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴타입에 %TYPE이 사용되고 참조되는 원래 타입이
+단, 위 %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴 타입에 %TYPE이 사용되고 참조되는 원래 타입이
 NUMERIC(p, s) 이면 원래 타입의 정밀도 p와 스케일 s가 유지된다.
 
 .. code-block:: sql
@@ -621,7 +622,7 @@ PL/CSQL은 다른 많은 프로그래밍 언어와 마찬가지로 Exception 핸
 | ZERO_DIVIDE         | 9       | 0으로 나누기 시도                                                |
 +---------------------+---------+------------------------------------------------------------------+
 
-위에서 각 Exception의 SQLCODE는 :ref:`OTHERS Exception 핸들러 블럭 <block_stmt>` 안에서
+위에서 각 Exception의 SQLCODE는 :ref:`OTHERS Exception 핸들러 block <block_stmt>` 안에서
 Exception의 종류를 식별하는데 사용할 수 있다.
 
 * 999 이하의 SQLCODE 값들은 시스템 Exception을 위해서 예약되어 있다.
@@ -1014,7 +1015,7 @@ Exception 선언
 :ref:`큐브리드 내장 함수 <operators-and-functions>`\와 동일한 이름을 가질 수 있다.
 이때 내장 함수는 내부 프로시저/함수가 선언된 scope 안에서 가려진다.
 
-함수의 경우에는  *body*\에서 RETURN 문으로 선언된 리턴타입에 맞는 값을 반환해야 한다.
+함수의 경우에는  *body*\에서 RETURN 문으로 선언된 리턴 타입에 맞는 값을 반환해야 한다.
 함수가 *body* 끝에 도달할 때까지 RETURN 문을 만나지 못하는 실행경로가 존재하면 컴파일 과정에서 에러가 발생한다.
 프로시저의 경우에는 RETURN 문에 반환값을 지정할 수 없다.
 
@@ -1189,7 +1190,7 @@ COMMIT, ROLLBACK, TRUNCATE 문은 프로그램의 실행문으로서 직접 사�
 * *close_statement*: 커서를 닫는다. 열려 있지 않은 커서를 닫으려고 시도하면 INVALID_CURSOR Exception이 발생한다.
 * *open_for_statement*: *identifier*\는 SYS_REFCURSOR 타입으로 선언된 변수이어야 한다. 지정된 *select_statement*\를 실행하는 커서를 내부적으로 열어서 지정된 변수에 할당한다. *select_statement*\가 INTO 절을 포함하면 컴파일 과정에서 에러가 발생한다.
 
-다음은 OPEN, FETCH, CLOSE 문의 사용예이다.
+다음은 OPEN, FETCH, CLOSE 문의 사용 예이다.
 
 .. code-block:: sql
 
@@ -1271,7 +1272,7 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 
 SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
-INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단 한건의 결과 레코드를 가져야 한다.
+INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
 
 ::
@@ -1289,7 +1290,7 @@ INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단
 * *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다. BOOLEAN이나 SYS_REFCURSOR 타입을 갖는 표현식을 가질 수 없다. :ref:`%ROWTYPE <percent_rowtype>`\으로 선언된 레코드 타입 값이나 커서도 표현식 자리에 올 수 없다.
 * *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 인자를 지정한다. *dynamic_sql*\이 SELECT문을 나타내는데 INTO 절이 없거나 *dynamic_sql*\이 SELECT문을 나타내지 않는데 INTO 절이 있으면 SQL_ERROR Exception이 발생한다.
 
-다음은 EXECUTE IMMEDIATE의 사용예이다.
+다음은 EXECUTE IMMEDIATE의 사용 예이다.
 
 .. code-block:: sql
 
@@ -1313,7 +1314,7 @@ INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한건 그리고 단
 * *identifier*: 변수이거나 OUT 인자이어야 한다.
 * *expression*: 대입될 값을 계산하는 표현식. 아래 표현식 절 참조
 
-*expression*의 타입은 *identifier*의 타입과 같거나 *identifier*의 타입으로 형변환이 가능해야 한다.
+*expression*\의 타입은 *identifier*\의 타입과 같거나 *identifier*\의 타입으로 형변환이 가능해야 한다.
 그렇지 않으면 컴파일 과정에서 에러가 발생한다.
 
 CONTINUE, EXIT
@@ -1430,7 +1431,7 @@ RETURN
         RETURN [ <expression> ]
 
 현재 루틴을 호출한 호출문 다음으로 분기한다.
-현재 루틴이 함수인 경우에는 그 함수의 리턴타입으로 변환 가능한 반환값 *expression*\을 지정해야 한다.
+현재 루틴이 함수인 경우에는 그 함수의 리턴 타입으로 변환 가능한 반환값 *expression*\을 지정해야 한다.
 현재 루틴이 함수가 아닌 프로시저인 경우에는 반환값을 지정하면 에러이다.
 
 프로시저 호출문
@@ -1487,7 +1488,7 @@ PL/CSQL이 제공하는 루프문은 아래와 같이 다섯 가지 형태가 �
 * *for-iter-loop* 형태의 루프에서 *lower_bound*, *upper_bound*, *step*\은 모두 INTEGER로 변환가능한 타입을 가져야 한다. 실행시간에 step 값이 0 이하이면 VALUE_ERROR Exception이 발생한다. REVERSE가 지정되지 않은 경우, *identifier*\는 *lower_bound*\로 초기화 된 후 *upper_bound*\보다 작거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step* 만큼 증가한 값이 *upper_bound*\보다 작거나 같다는 조건을 만족하는 한 반복한다.  REVERSE가 지정된 경우에는, *identifier*\는 *upper_bound*\로 초기화 된 후 *lower_bound*\보다 크거나 같다는 조건을 만족하면 루프 바디를 한번 실행하고 그 이후는 *step*\만큼 감소한 값이 *lower_bound*\보다 크거나 같다는 조건을 만족하는 한 반복한다. 루프 변수 *identifier*\는 루프 바디 안에서 INTEGER 타입 변수로 사용될 수 있다.
 * *for-cursor-loop*, *for-static-sql-loop* 형태의 FOR 루프는 *record* IN 다음에 기술하는 커서나 SELECT 문의 조회 결과들을 순회하기 위해 사용된다. 이때 사용되는 SELECT 문에 INTO 절이 있으면 컴파일 과정에서 에러가 발생한다. 매 iteration 마다 조회 결과가 한 row 씩 *record*\에 할당된 상태로 루프 바디가 실행된다. 이때, 결과 row의 각 컬럼들은 루프 바디 안에서 *record*. *column* 모양으로 참조할 수 있다.
 
-다음은 For-Iterator Loop 구문의 사용예를 보여준다.
+다음은 For-Iterator Loop 구문의 사용 예를 보여준다.
 
 .. code-block:: sql
 
@@ -1817,9 +1818,9 @@ CASE 표현식은 :ref:`CASE 실행문 <case_stmt>`\(Statement)과 마찬가지�
 SQLCODE, SQLERRM
 =================
 
-Exception 처리 블럭 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 Exception의 코드(INTEGER 타입)와
+Exception 처리 block 안에서 SQLCODE와 SQLERRM은 각각 현재 처리 중인 Exception의 코드(INTEGER 타입)와
 에러메시지(STRING 타입)를 나타낸다.
-Exception 처리 블럭 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
+Exception 처리 block 밖에서 SQLCODE와 SQLERRM은 각각 0과 'no error' 값을 갖는다.
 
 .. code-block:: sql
 
