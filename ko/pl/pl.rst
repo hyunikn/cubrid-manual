@@ -28,18 +28,26 @@ PL/CSQL은 저장 프로시저나 저장 함수를 생성하는데 사용된다.
 그 앞의 선언부 *seq_of_declare_specs*\는 실행문들 안에서 사용될 변수, 상수, Exception 등을 선언한다.
 이들 문법 요소에 대한 자세한 내용은 :ref:`선언문 <decl>`\과 :ref:`실행문 <stmt>` 절을 참고한다.
 
+저장 프로시저/함수는 Auto Commit 기능이 언제나 비활성화 된 상태로 실행된다.
+이는 호출한 세션에서 Auto Commit 기능이 활성화 되어 있어도 마찬가지이다.
+
 저장 프로시저/함수는 :ref:`큐브리드 내장 함수 <operators-and-functions>`\와 동일한 이름을 가질 수 없다.
 동일한 이름으로 선언하면 컴파일 과정에서 (CREATE 문 실행 과정에서) 에러가 발생한다.
 
-body 내부의 실행문들 중에 도달할 수 없는 것이 있을 때는 컴파일 과정에서 에러가 발생한다.
+body 내부의 실행문들 중에 실행 중 도달할 수 없는 것이 있을 때는 컴파일 과정에서 에러가 발생한다.
 다음은 도달할 수 없는 실행문이 있는 간단한 예이다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    csql> CREATE OR REPLACE PROCEDURE test_unreachable_statement
+    csql> AS
+    csql> BEGIN
+    csql>     return;
+    csql>     dbms_output.put_line('Hello world');
+    csql> END;
 
-저장 프로시저/함수는 Auto Commit 기능이 언제나 비활성화 된 상태로 실행된다.
-이는 호출한 세션에서 Auto Commit 기능이 활성화 되어 있어도 마찬가지이다.
+    ERROR: In line 5, column 5
+    Stored procedure compile error: unreachable statement
 
 다음은 PL/CSQL을 사용해서 작성한 저장 프로시저/함수의 예이다.
 
@@ -133,35 +141,55 @@ SQL 구문 중에 다음에 해당하는 것들을 PL/CSQL 실행문으로 직�
 * COMMIT, ROLLBACK
 * TRUNCATE
 
+이들의 자세한 문법과 의미는 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
 위 목록에 포함되지 않는 다른 SQL 문들은 직접 사용할 수는 없으나,
 아래에서 설명하는 Dynamic SQL 문을 써서 실행할 수 있다.
 
-SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서 <cursor_decl>`\를 선언할 때나 :ref:`OPEN-FOR <cursor_manipulation>` 문에도 사용된다.
-
-
+SELECT 문은 실행문으로 사용될 뿐만 아니라 :ref:`커서를 선언 <cursor_decl>`\할 때나
+:ref:`OPEN-FOR <cursor_manipulation>` 문에도 사용된다.
 SELECT 문의 INTO 절에 프로그램의 변수나 OUT 인자를 써서 조회 결과를 담을 수 있다.
 이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
-SELECT 문을 실행문으로 사용할 때에는 INTO 절을 반드시 포함해야 하는 반면
-SELECT 문을 커서 선언이나 OPEN-FOR 문에서 사용할 때에는 INTO 절을 포함하지 않아야 한다.
+SELECT 문을 실행문으로 사용할 때는 INTO 절을 반드시 포함해야 하는 반면
+SELECT 문을 :ref:`커서 선언 <cursor_decl>`이나 :ref:`OPEN-FOR <cursor_manipulation>` 문에서
+사용할 때는 INTO 절을 포함하지 않아야 한다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE PROCEDURE test_into_clause_1
+    AS
+        h int;
+        s varchar(10);
+        CURSOR c IS SELECT host_year, score INTO h, s FROM history;     // Error: INTO clause
+    BEGIN
+        ...
+    END;
+
+    CREATE OR REPLACE PROCEDURE test_into_clause_2
+    AS
+        h int;
+        s varchar(10);
+        r SYS_REFCURSOR;
+    BEGIN
+        OPEN r FOR SELECT host_year, score INTO h, s FROM history;      // Error: INTO clause
+        ...
+    END;
+
+    CREATE OR REPLACE PROCEDURE test_into_clause_3
+    AS
+    BEGIN
+        SELECT host_year, score FROM history WHERE event_code = 20023;  // Error: no INTO clause
+        ...
+    END;
 
 SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
-결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
+결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때는 TOO_MANY_ROWS Exception이 발생한다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
 프로그램에서 선언한 변수, 상수, 프로시저/함수 인자를 쓸 수 있다.
 단, 이들은 BOOLEAN이나 SYS_REFCURSOR 타입을 가져서는 안된다. :ref:`SQL 데이터타입 <datatype_index>`\이
 이들을 포함하지 않기 때문이다.
 
-.. code-block:: sql
-
-    -- TODO: example
-
-SQL 구문의 문법과 의미는 CUBRID 매뉴얼 중 :ref:`CUBRID SQL <cubrid_sql>`\을 참고하도록 한다.
 다음은 Static SQL 사용 예이다.
 
 .. code-block:: sql
@@ -239,7 +267,8 @@ Dynamic SQL은 주로 다음 두 가지 경우에 필요하다.
 작성 규칙
 ==================
 
-식별자, 예약어, 주석, 리터럴을 작성할 때 Static/Dynamic SQL 안에서는 :ref:`SQL의 작성 규칙 <lexical_rules>`\을 따른다.
+식별자, 예약어, 주석, 리터럴을 작성할 때 :ref:`Static <static_sql>`/:ref:`Dynamic <dyn_sql>`
+SQL 안에서는 :ref:`SQL의 작성 규칙 <lexical_rules>`\을 따른다.
 
 Static/Dynamic SQL 밖의 PL/CSQL 문 작성 규칙도 대체로 같은 규칙을 따르지만 다음 몇 가지 예외가 있다.
 
@@ -321,7 +350,7 @@ Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, �
 데이터 타입
 ==================
 
-Static/Dynamic SQL에서는 SQL에서 제공하는 모든 :ref:`데이터 타입 <datatype_index>`\을 쓸 수 있다.
+Static/Dynamic SQL에서는 SQL에서 제공하는 모든 :ref:`데이터 타입 <datatype_index>`\을 사용할 수 있다.
 
 반면, Static/Dynamic SQL 밖의 PL/CSQL 문에서 사용할 수 있는 데이터 타입은
 BOOLEAN, SYS_REFCURSOR와 SQL에서 제공하는 데이터 타입 중 일부이다.
@@ -329,7 +358,7 @@ BOOLEAN, SYS_REFCURSOR와 SQL에서 제공하는 데이터 타입 중 일부이�
 * BOOLEAN: TRUE, FALSE, NULL을 값으로 가질 수 있다.
   CREATE PROCEDURE/FUNCTION 문에서 인자 타입이나 리턴 타입으로 BOOLEAN을 사용할 수는 없다.
   왜냐하면 SQL에 BOOLEAN 타입이 정의되어 있지 않기 때문이다.
-  단, :ref:`내부 프로시저/함수 <local_routine_decl>`\를 선언할 때에는 인자 타입이나 리턴 타입으로
+  단, :ref:`내부 프로시저/함수 <local_routine_decl>`\를 선언할 때는 인자 타입이나 리턴 타입으로
   BOOLEAN을 사용할 수 있다.
 * SYS_REFCURSOR: 커서 변수를 선언할 때 사용한다.
   커서 변수의 용도는 :ref:`OPEN-FOR <cursor_manipulation>` 문을 참고한다.
@@ -394,8 +423,8 @@ SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 �
 
 <table>.<column>%TYPE은 CREATE PROCEDURE/FUNTION 문을 실행하는 시점에 지정된 테이블 컬럼의 타입을 나타내지만,
 나중에 그 컬럼의 타입이 변경되어도 자동으로 <table>.<column>%TYPE을 사용한 저장 프로시저/함수의 동작에 반영되지는 않는다.
-그러므로, %TYPE을 적용한 테이블 컬럼의 타입이 변경되었을 때에는 그 %TYPE을 사용한 저장 프로시저/함수에 대해서 모두
-ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일 해주어야 한다.
+그러므로, %TYPE을 적용한 테이블 컬럼의 타입이 변경되었을 때는 그 %TYPE을 사용한 저장 프로시저/함수에 대해서 모두
+ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일해 주어야 한다.
 
 테이블 컬럼 뿐만 아니라 프로시저/함수의 인자나 변수 이름 뒤에 %TYPE을 덧붙여 그 인자나 변수의 타입을 나타낼 수 있다.
 
@@ -443,17 +472,32 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 레코드 변수에 NULL을 대입하면 각 필드가 NULL로 초기화 되지만 레코드 변수 값 자체가 NULL이 되지는 않는다.
 즉, 레코드 변수는 선언 이후로 NULL 값을 갖는 일이 없다.
 
-동일한 타입의 레코드끼리는 =과 != 연산자로 비교할 수 있다.
-대응하는 필드끼리 <=> 연산을 한 결과가 모두 TRUE일 때
-두 레코드에 대한 = 연산의 결과는 TRUE이고 그렇지 않으면 FALSE이다.
+동일한 타입의 레코드끼리는 =와 != 연산자로 비교할 수 있다.
+여기서 동일 타입 레코드란 하나의 테이블로부터 얻어진 레코드 타입만을 의미하는 것이 아니라
+다른 테이블이라도 대응하는 필드들의 이름과 타입이 일치하는 경우까지 포함하는 것이다.
+두 레코드에 대한 = 연산의 결과는 대응하는 필드끼리 <=> 연산을 한 결과가 모두 TRUE일 때 TRUE이고 그렇지 않으면 FALSE이다.
 != 연산의 결과는 = 연산 결과의 반대이다.
 다른 타입의 레코드에 =와 != 연산자를 사용했을 때는 컴파일 과정에서 에러가 발생한다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    create table tblA(a INT, b CHAR, c VARCHAR);
+    create table tblB(a INT, b CHAR, c VARCHAR);        // tblA%ROWTYPE과 tblB%ROWTYPE은 동일 타입
+    create table tblB(aa INT, bb CHAR, cc VARCHAR);     // tblA%ROWTYPE과 tblC%ROWTYPE은 동일 타입 아님
 
-다른 비교 연산자 <=>, <, >, <=, >= 들은 레코드 비교에 적용할 수 없다.
+    CREATE OR REPLACE PROCEDURE test_record_equality AS
+        r1 tblA%ROWTYPE;
+        r2 tblB%ROWTYPE;
+        r3 tblC%ROWTYPE;
+    BEGIN
+        ...
+        if (r1 = r2) then       // OK
+        ...
+        if (r1 = r3) then       // Error
+        ...
+    END;
+
+=와 != 아닌 다른 비교 연산자 <=>, <, >, <=, >= 들은 레코드 비교에 적용할 수 없다.
 
 한 레코드 변수 s로부터 다른 레코드 변수 t로의 대입이 다음 경우에 가능하다.
 
@@ -464,14 +508,34 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
 .. code-block:: sql
 
-    -- TODO: example
+    create table tblAA(a NUMERIC, b DATETIME);
+    create table tblBB(m INT, n VARCHAR);
+    create table tblCC(x INT, y TIME);
+
+    CREATE OR REPLACE PROCEDURE test_record_assign AS
+        r1 tblAA%ROWTYPE;
+        r2 tblBB%ROWTYPE;
+        r3 tblCC%ROWTYPE;
+    BEGIN
+        ...
+        r1 := r2;   // OK
+        r1 := r3;   // Error: TIME에서 DATETIME으로 대입 불가 (형변환 불가)
+    END;
 
 %ROWTYPE은 내부 프로시저/함수의 인자 타입과 리턴 타입으로 쓸 수 있다.
-그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL 문에서 %ROWTYPE을 지원하지 않기 때문이다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입으로는 쓸 수 없다. SQL 문에서 레코드 타입을 지원하지 않기 때문이다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE PROCEDURE sp(a tbl%ROWTYPE) AS    // Error
+
+        PROCEDURE inner(b tbl%ROWTYPE) AS               // OK
+        BEGIN
+            ...
+        END;
+    BEGIN
+        ...
+    END;
 
 Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 쓸 수 있다.
 단, 이 때 INTO 절 안에 다른 변수를 함께 쓸 수 없다.
@@ -525,36 +589,85 @@ Static SQL UPDATE 문에도 다음과 같이 'SET ROW = <record>' 구문을 사�
 
 :ref:`PL/CSQL에서 지원하는 데이터 타입 <datatype_index>` 중에 NUMERIC은 정밀도와 스케일을,
 CHAR와 VARCHAR는 길이를 지정할 수 있다.
-그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입에는 예외적으로 정밀도와 스케일을 지정이 허용되지 않는다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입에는 예외적으로 정밀도와 스케일 지정이 허용되지 않는다.
+내부 프로시저/함수에서도 마찬가지이다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE FUNCTION sf(a NUMERIC(5, 3)) RETURN VARCHAR(10) AS ...    // Error
+    CREATE OR REPLACE FUNCTION sf(a NUMERIC) RETURN VARCHAR AS ...              // OK
 
-그리고, NUMERIC 타입에서 정밀도와 스케일이 생략되면 NUMERIC(15, 0)을 나타내지만,
-예외적으로 인자 타입과 리턴 타입에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다.
-또한, CHAR와 VARCHAR도 인자 타입과 리턴 타입에서는 다른 곳에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
-아니라 임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다.
+그리고, 일반적으로 정밀도와 스케일이 생략된 NUMERIC은 NUMERIC(15, 0)을 의미하지만
+예외적으로 인자 타입과 리턴 타입 자리에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다
+(단, 정밀도는 1 이상 38 이하. 스케일은 0 이상 정밀도 이하 범위 안에서).
+또한, CHAR와 VARCHAR도 인자 타입과 리턴 타입 자리에서는 다른 곳에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
+아니라 임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다
+(단, CHAR 길이는 2048 이하. VARCHAR의 길이는 1073741823 이하 범위 안에서).
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE FUNCTION test_any_precision_scale(a NUMERIC) return NUMERIC
+    AS
+    BEGIN
+        return a;
+    END;
+
+    SELECT test_any_precision_scale(1.23);      -- 결과: 1.23
+    SELECT test_any_precision_scale(1.234);     -- 결과: 1.234
+    SELECT test_any_precision_scale(1.2345);    -- 결과: 1.2345
+
+    CREATE OR REPLACE FUNCTION test_any_length(a CHAR) return CHAR
+    AS
+    BEGIN
+        return a;
+    END;
+
+    SELECT test_any_length('ab');       -- 결과: 'ab'
+    SELECT test_any_length('abc');      -- 결과: 'abc'
+    SELECT test_any_length('abcd');     -- 결과: 'abcd'
 
 인자 타입과 리턴 타입을 :ref:`%TYPE <percent_type>`\을 사용해서 지정했을 때에도 참조되는 원래 타입의
 정밀도, 스케일, 길이 지정은 무시되고 대신 임의의 정밀도, 스케일, 길이를 허용하는 것으로 동작한다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE TABLE tbl(p NUMERIC(3,2), q CHAR(3));
 
-단, 위 %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴 타입에 %TYPE이 사용되고 참조되는 원래 타입이
+    CREATE OR REPLACE FUNCTION test_ptype_precision_scale(a tbl.p%TYPE) RETURN NUMERIC
+    AS
+    BEGIN
+        RETURN a;
+    END;
+
+    SELECT test_ptype_precision_scale(1.23);      -- 결과: 1.23
+    SELECT test_ptype_precision_scale(1.234);     -- 결과: 1.234
+    SELECT test_ptype_precision_scale(1.2345);    -- 결과: 1.2345
+
+    CREATE OR REPLACE FUNCTION test_ptype_length(a tbl.q%TYPE) RETURN tbl.q%TYPE
+    AS
+    BEGIN
+        RETURN a;
+    END;
+
+    SELECT test_ptype_length('ab');       -- 결과: 'ab'
+    SELECT test_ptype_length('abc');      -- 결과: 'abc'
+    SELECT test_ptype_length('abcd');     -- 결과: 'abcd'
+
+단, %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴 타입에 %TYPE이 사용되고 참조되는 원래 타입이
 NUMERIC(p, s) 이면 원래 타입의 정밀도 p와 스케일 s가 유지된다.
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE FUNCTION test_return_ptype_numeric(a tbl.p%TYPE) RETURN tbl.p%TYPE
+    AS
+    BEGIN
+        RETURN a;
+    END;
 
-
+    SELECT test_return_ptype_numeric(1.23);      -- 결과: 1.23
+    SELECT test_return_ptype_numeric(1.234);     -- 결과: 1.23
+    SELECT test_return_ptype_numeric(1.2345);    -- 결과: 1.23
+    SELECT test_return_ptype_numeric(12.345);    -- Error: 스케일 2로 반올림한 값 12.34가 정밀도 3을 초과
 
 연산자와 함수
 ==================
@@ -704,7 +817,24 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE PROCEDURE test_system_config
+    AS
+    BEGIN
+        -- compat_numeric_division_scale가 no일 때 0.125000000, yes일 때 0.1
+        dbms_output.put_line(1.0 / 8.0);
+
+        -- oracle_compat_number_behavior가 no일 때 1, yes일 때 2
+        dbms_output.put_line(3 / 2);
+
+        -- oracle_style_empty_string가 no일 때 'false', yes일 때 'true'
+        if '' IS NULL THEN
+            dbms_output.put_line('true');
+        ELSE
+            dbms_output.put_line('false');
+        END IF;
+    END;
+
+이들 설정의 자세한 의미는 :ref:`서버 설정 파라미터 <system_config>`\를 참조할 수 있다.
 
 위 4개 외 다른 설정은 Static/Dynamic SQL 밖의 PL/CSQL 문에서 유효하지 않다. 특히,
 
@@ -714,7 +844,18 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE PROCEDURE test_system_config_2
+    AS
+    BEGIN
+        -- no_backslash_escapes 값에 상관없이 'Hello\nworld'
+        dbms_output.put_line('Hello\nworld');
+
+        -- pipes_as_concat 값에 상관없이 'ab'
+        dbms_output.put_line('a' || 'b');
+
+        -- plus_as_concat 값에 상관없이 '12'
+        dbms_output.put_line('1' + '2');
+    END;
 
 .. _decl:
 
@@ -786,18 +927,18 @@ Static/Dynamic SQL 밖에서 PL/CSQL 문은 오직 다음 4개 서버 설정 파
 
 .. code-block:: sql
 
-    csql> create or replace procedure poo(a int) as
+    csql> CREATE OR REPLACE PROCEDURE poo(a INT) AS
     csql>
-    csql>     procedure inner as
-    csql>         i int := a;
-    csql>         a numeric;
-    csql>     begin
+    csql>     PROCEDURE inner AS
+    csql>         i INT := a;
+    csql>         a NUMERIC;
+    csql>     BEGIN
     csql>         ...
-    csql>     end;
+    csql>     END;
     csql>
-    csql> begin
+    csql> BEGIN
     csql>     ...
-    csql> end;
+    csql> END;
 
     ERROR: In line 5, column 9
     Stored procedure compile error: name A has already been used at line 4 and column 18 in the same declaration block
@@ -1257,7 +1398,25 @@ RAISE_APPLICATION_ERROR의 사용 형태는 Built-in 프로시저 호출처럼 �
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE PROCEDURE test_raise_app_err(i INT)
+    AS
+    BEGIN
+        CASE i
+        WHEN 1 THEN
+            RAISE_APPLICATION_ERROR(1001, 'my error 1');
+        WHEN 2 THEN
+            RAISE_APPLICATION_ERROR(1002, 'my error 2');
+        WHEN 3 THEN
+            RAISE_APPLICATION_ERROR(1003, 'my error 3');
+        END CASE;
+    EXCEPTION
+        WHEN OTHERS THEN
+            dbms_output.put_line('code=' || SQLCODE || ', message=''' || SQLERRM || '''');
+    END;
+
+    CALL test_raise_app_err(1);     -- 출력: code=1001, message='my error 1'
+    CALL test_raise_app_err(2);     -- 출력: code=1002, message='my error 2'
+    CALL test_raise_app_err(3);     -- 출력: code=1003, message='my error 3'
 
 .. _exec_imme:
 
@@ -1273,7 +1432,7 @@ INTO 절을 써서 SELECT 문의 조회 결과를 프로그램의 변수나 OUT 
 
 SQL 문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
 INTO 절을 포함한 경우 SELECT 문의 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
-결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때에는 TOO_MANY_ROWS Exception이 발생한다.
+결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때는 TOO_MANY_ROWS Exception이 발생한다.
 
 ::
 
@@ -1446,7 +1605,28 @@ RETURN
 인자 개수와 각각의 타입은 해당 프로시저의 선언과 일치해야 한다.
 호출되는 프로시저의 OUT 인자에 주어질 인자들은 프로시저 호출 결과로 변경이 될 것이므로
 대입이 가능한 변수나 다른 OUT 인자이어야 한다.
-다른 저장 프로시저 실행에 문제가 있을 때는 SQL_ERROR Exception이 발생한다.
+
+.. code-block:: sql
+
+    CREATE OR REPLACE PROCEDURE callee(o OUT INT)
+    AS
+    BEGIN
+        ...
+    END;
+
+    CREATE OR REPLACE PROCEDURE caller(i INT, o OUT INT)
+    AS
+        v INT;
+        c CONSTANT INT := 0;
+    BEGIN
+        callee(i);   -- Error: IN 인자
+        callee(o);   -- OK: OUT 인자
+        callee(v);   -- OK: 변수
+        callee(c);   -- Error: 상수
+    END;
+
+호출되는 프로시저는 저장 프로시저이거나 내부 프로시저이다.
+다른 저장 프로시저 호출문 실행 중에 문제가 발생했을 때는 SQL_ERROR Exception이 발생한다.
 
 IF
 ==
@@ -1654,7 +1834,7 @@ Static SQL 결과 크기
 ====================
 SQL%ROWCOUNT는 Static SQL을 실행한 직후에 결과 크기를 나타내는 표현식이다.
 
-* 커서와 연관되지 않은 SELECT 문의 경우 반드시 INTO 절을 포함하게 되고 조회 결과는 1개이어야 한다. 따라서, 이 SELECT 문이 정상적으로 수행되었을 때 SQL%ROWCOUNT의 값은 1이다. 조회 결과 크기가 0이거나 1을 초과해서 실행시간 에러가 발생했을 때에는 SQL%ROWCOUNT의 값은 정의되지 않는다.
+* 커서와 연관되지 않은 SELECT 문의 경우 반드시 INTO 절을 포함하게 되고 조회 결과는 1개이어야 한다. 따라서, 이 SELECT 문이 정상적으로 수행되었을 때 SQL%ROWCOUNT의 값은 1이다. 조회 결과 크기가 0이거나 1을 초과해서 실행시간 에러가 발생했을 때는 SQL%ROWCOUNT의 값은 정의되지 않는다.
 * INSERT, UPDATE, DELETE, MERGE, REPLACE, TRUNCATE 문의 경우 영향 받은 레코드 개수가 된다.
 * COMMIT, ROLLBACK 문에 대해서는 0이 된다.
 
@@ -1755,17 +1935,28 @@ PL/CSQL에서는 다음 두 가지 경우에 레코드 변수를 사용할 수 �
 
 .. code-block:: sql
 
-    -- TODO: example
+    CREATE OR REPLACE FUNCTION callee(o OUT INT) RETURN INT
+    AS
+    BEGIN
+        ...
+    END;
+
+    CREATE OR REPLACE PROCEDURE caller(i INT, o OUT INT)
+    AS
+        v INT;
+        c CONSTANT INT := 0;
+    BEGIN
+        ... callee(i) ...   -- Error: IN 인자
+        ... callee(o) ...   -- OK: OUT 인자
+        ... callee(v) ...   -- OK: 변수
+        ... callee(c) ...   -- Error: 상수
+    END;
 
 호출되는 함수는 저장 함수, 내부 함수, 빌트인 함수 이렇게 세 가지 종류이다.
 이 중에서 빌트인 함수는 :ref:`연산자와 함수 <operators-and-functions>` 장에 나열된 큐브리드 내장 함수들을 말한다.
 단, 빌트인 함수들 중에서 PL/CSQL 문법과 충돌을 일으키는 :ref:`IF <func_if>`\는 사용할 수 없다.
 
-.. code-block:: sql
-
-    -- TODO: example
-
-다른 저장 함수나 빌트인 함수 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
+다른 저장 함수나 빌트인 함수 호출문 실행 중에 에러가 나면 SQL_ERROR Exception이 발생한다.
 
 CASE 표현식
 =================
