@@ -151,7 +151,7 @@ SELECT 문의 INTO 절에 프로그램의 변수나 OUT 인자를 써서 조회 
 이 때 조회 결과 값들의 개수는 INTO 절 안의 변수나 OUT 인자의 개수와 일치해야 하고
 값들은 대응되는 변수나 OUT 인자에 대입 가능한 타입을 가져야 한다.
 SELECT 문을 실행문으로 사용할 때는 INTO 절을 반드시 포함해야 하는 반면
-SELECT 문을 :ref:`커서 선언 <cursor_decl>`이나 :ref:`OPEN-FOR <cursor_manipulation>` 문에서
+SELECT 문을 :ref:`커서 선언 <cursor_decl>`\이나 :ref:`OPEN-FOR <cursor_manipulation>` 문에서
 사용할 때는 INTO 절을 포함하지 않아야 한다.
 
 .. code-block:: sql
