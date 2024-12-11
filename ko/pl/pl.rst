@@ -160,7 +160,7 @@ SELECT 문을 :ref:`커서 선언 <cursor_decl>`\이나 :ref:`OPEN-FOR <cursor_m
     AS
         h int;
         s varchar(10);
-        CURSOR c IS SELECT host_year, score INTO h, s FROM history;     // Error: INTO clause
+        CURSOR c IS SELECT host_year, score INTO h, s FROM history;     -- Error: INTO clause
     BEGIN
         ...
     END;
@@ -171,14 +171,14 @@ SELECT 문을 :ref:`커서 선언 <cursor_decl>`\이나 :ref:`OPEN-FOR <cursor_m
         s varchar(10);
         r SYS_REFCURSOR;
     BEGIN
-        OPEN r FOR SELECT host_year, score INTO h, s FROM history;      // Error: INTO clause
+        OPEN r FOR SELECT host_year, score INTO h, s FROM history;      -- Error: INTO clause
         ...
     END;
 
     CREATE OR REPLACE PROCEDURE test_into_clause_3
     AS
     BEGIN
-        SELECT host_year, score FROM history WHERE event_code = 20023;  // Error: no INTO clause
+        SELECT host_year, score FROM history WHERE event_code = 20023;  -- Error: no INTO clause
         ...
     END;
 
@@ -284,17 +284,17 @@ Static/Dynamic SQL 밖의 PL/CSQL 문 작성 규칙도 대체로 같은 규칙�
     a
     a_b
     athleteName2
-    "select"        // " "로 둘러싸인 예약어
+    "select"        -- " "로 둘러싸인 예약어
 
 .. rubric:: 허용되지 않는 식별자의 예
 
 ::
 
-    1a              // 숫자로 시작
-    a@b             // 특수문자
-    athlete-name-2  // 특수문자
-    [a@b]           // [ ]로 둘러싸더라도 특수문자 불가
-    select          // 예약어
+    1a              -- 숫자로 시작
+    a@b             -- 특수문자
+    athlete-name-2  -- 특수문자
+    [a@b]           -- [ ]로 둘러싸더라도 특수문자 불가
+    select          -- 예약어
 
 PL/CSQL의 예약어는 아래 표에 나열되어 있다.
 Static/Dynamic SQL 밖의 PL/CSQL 문에서 아래 표의 단어들을 변수, 상수, Exception, 내부 프로시저/함수
@@ -482,8 +482,8 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 .. code-block:: sql
 
     create table tblA(a INT, b CHAR, c VARCHAR);
-    create table tblB(a INT, b CHAR, c VARCHAR);        // tblA%ROWTYPE과 tblB%ROWTYPE은 동일 타입
-    create table tblB(aa INT, bb CHAR, cc VARCHAR);     // tblA%ROWTYPE과 tblC%ROWTYPE은 동일 타입 아님
+    create table tblB(a INT, b CHAR, c VARCHAR);        -- tblA%ROWTYPE과 tblB%ROWTYPE은 동일 타입
+    create table tblB(aa INT, bb CHAR, cc VARCHAR);     -- tblA%ROWTYPE과 tblC%ROWTYPE은 동일 타입 아님
 
     CREATE OR REPLACE PROCEDURE test_record_equality AS
         r1 tblA%ROWTYPE;
@@ -491,9 +491,9 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
         r3 tblC%ROWTYPE;
     BEGIN
         ...
-        if (r1 = r2) then       // OK
+        if (r1 = r2) then       -- OK
         ...
-        if (r1 = r3) then       // Error
+        if (r1 = r3) then       -- Error
         ...
     END;
 
@@ -518,8 +518,8 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
         r3 tblCC%ROWTYPE;
     BEGIN
         ...
-        r1 := r2;   // OK
-        r1 := r3;   // Error: TIME에서 DATETIME으로 대입 불가 (형변환 불가)
+        r1 := r2;   -- OK
+        r1 := r3;   -- Error: TIME에서 DATETIME으로 대입 불가 (형변환 불가)
     END;
 
 %ROWTYPE은 내부 프로시저/함수의 인자 타입과 리턴 타입으로 쓸 수 있다.
@@ -527,9 +527,9 @@ r의 값은 필드 a, b, c를 갖는 레코드가 되고 r.a, r.b, r.c는 각각
 
 .. code-block:: sql
 
-    CREATE OR REPLACE PROCEDURE sp(a tbl%ROWTYPE) AS    // Error
+    CREATE OR REPLACE PROCEDURE sp(a tbl%ROWTYPE) AS    -- Error
 
-        PROCEDURE inner(b tbl%ROWTYPE) AS               // OK
+        PROCEDURE inner(b tbl%ROWTYPE) AS               -- OK
         BEGIN
             ...
         END;
@@ -594,8 +594,8 @@ CHAR와 VARCHAR는 길이를 지정할 수 있다.
 
 .. code-block:: sql
 
-    CREATE OR REPLACE FUNCTION sf(a NUMERIC(5, 3)) RETURN VARCHAR(10) AS ...    // Error
-    CREATE OR REPLACE FUNCTION sf(a NUMERIC) RETURN VARCHAR AS ...              // OK
+    CREATE OR REPLACE FUNCTION sf(a NUMERIC(5, 3)) RETURN VARCHAR(10) AS ...    -- Error
+    CREATE OR REPLACE FUNCTION sf(a NUMERIC) RETURN VARCHAR AS ...              -- OK
 
 그리고, 일반적으로 정밀도와 스케일이 생략된 NUMERIC은 NUMERIC(15, 0)을 의미하지만
 예외적으로 인자 타입과 리턴 타입 자리에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다
