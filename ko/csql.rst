@@ -1407,7 +1407,7 @@ OPT LEVEL의 상세한 내용은 :ref:`viewing-query-plan`\ 를 참고한다.
 
 이 값을 ON으로 설정하면 서버의 DBMS_OUTPUT 버퍼에 저장된 메시지를 출력한다. 기본값은 OFF이다.
 DBMS_OUTPUT 버퍼는 주로 PL/CSQL 저장 프로시저/함수에서 DBMS_OUTPUT.put_line() 호출을 통해 쌓인 메시지들을 저장하고 있다.
-DBMS_OUTPUT 메시지는 CSQL이 실행한 SQL 문의 결과 출력에 뒤이어 '<DBMS_OUTPUT>' 이라는 표시 다음에 출력된다.
+DBMS_OUTPUT 메시지들은 CSQL이 실행한 SQL 문의 결과 출력 후에 '<DBMS_OUTPUT>'  표시와 함께 출력된다.
 특히, 실행 순서 상 DBMS_OUTPUT.put_line() 호출이 먼저이고 에러 발생이 나중이라도 실행 결과인 에러메시지가 먼저 출력되고
 DBMS_OUTPUT 메시지 출력이 나중이니 주의하자. ::
 
