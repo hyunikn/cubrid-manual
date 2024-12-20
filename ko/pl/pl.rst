@@ -993,7 +993,7 @@ NOT NULL 조건이 지정된 경우에는 반드시 NULL이 아닌 초기값이 
 * *builtin_type*: :ref:`데이터 타입 <types>` 절에서 설명한 시스템 제공 타입
 
 상수 선언에는 필수적으로 값 지정이 포함되어야 한다.
-NOT NULL 조건이 지정된 경우에 이 값은 NULL이 아니어야 한다.
+NOT NULL 조건이 지정된 경우, 이 값은 NULL이 아니어야 한다.
 
 .. code-block:: sql
 
