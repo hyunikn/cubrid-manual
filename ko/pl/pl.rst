@@ -764,7 +764,7 @@ Exception의 종류를 식별하는데 사용할 수 있다.
     END;
 
 발생한 Exception에 대한 처리를 명시적 (WHEN ... THEN ... 절)으로 처리하지 않은 경우에는
-코드상에서의 Exception 발생 위치와 에러메시지가 DBMS에 접속한 클라이언트 응용 프로그램에 전달된다.
+코드상의 Exception 발생 위치와 에러메시지가 출력된다.
 예를 들어, 위 athlete_code()에서 Exception 처리절들을 삭제하고
 
 .. code-block:: sql
