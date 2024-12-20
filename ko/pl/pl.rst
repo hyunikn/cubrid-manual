@@ -556,7 +556,7 @@ Static/Dynamic SQL SELECT 문과 FETCH 문의 INTO 절에 레코드 변수를 �
    -- Fetch
    FETCH c INTO part;
 
-Static SQL INSERT/REPLACE 문의 VALUES 절에 레코드 변수를 쓸 수 있다.
+Static SQL INSERT/REPLACE 문의 VALUES 절에 레코드 변수를 사용할 수 있으며, 레코드 변수를 사용할 경우 다른 변수와 함께 사용할 수 없다.
 단, 이 때 VALUES 절 안에 다른 변수를 함께 쓸 수 없다.
 그리고, 대입되는 테이블 컬럼들과 레코드 필드들의 개수가 같아야 한다.
 이 때, 같은 순번의 컬럼과 필드끼리 이름이 같을 필요는 없지만 필드 타입으로부터 컬럼 타입으로 대입 가능해야 한다.
