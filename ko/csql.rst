@@ -372,7 +372,7 @@ CSQL은 SQL의 문자열 리터럴, 주석, 식별자를 (참고: :ref:`작성 �
     csql> ;exit    <-- CSQL 종료
     ...
 
-이 성질은 CSQL을 종료한다거나 (:ref:`;exit <scmd_exit>`),
+이 예외는 CSQL을 종료한다거나 (:ref:`;exit <scmd_exit>`),
 편집하던 내용을 에디터로 이어서 편집한다거나 (:ref:`;edit <scmd_edit>`),
 질의 버퍼를 비운다거나 (:ref:`;clear <scmd_clear>`) 하는 등의 작업을
 편집 위치에 상관없이 언제나 가능하도록 하기 위해서 필요하다.
