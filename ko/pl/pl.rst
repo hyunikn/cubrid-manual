@@ -1440,7 +1440,7 @@ INTO 절을 포함한 경우 SELECT 문의 조회 결과는  단 한 건의 결�
 
 
 * *dynamic_sql*: 문자열 타입을 갖는 표현식. 표현식은 SQL 규약에 맞는 SQL 구문 문자열을 계산 결과로 가져야 한다.
-  SQL 구문 중간중간 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 이러한 ?의 개수와 *using_clause*\에
+  SQL 구문 내부에서 값을 필요로 하는 자리에 ?(물음표)를 대신 쓸 수 있으며 사용한 ?의 개수와 *using_clause*\에
   포함된 표현식의 개수는 일치해야 한다.
 * *using_clause*: *dynamic_sql*\을 실행할 때 문자열의 ? 자리에 채워질 값들을 지정한다. BOOLEAN이나 SYS_REFCURSOR 타입을 갖는 표현식을 가질 수 없다. :ref:`%ROWTYPE <percent_rowtype>`\으로 선언된 레코드 타입 값이나 커서도 표현식 자리에 올 수 없다.
 * *into_clause*: *dynamic_sql*\이 SELECT문을 나타내는 경우에 조회 결과를 담을 변수나 OUT 인자를 지정한다. *dynamic_sql*\이 SELECT문을 나타내는데 INTO 절이 없거나 *dynamic_sql*\이 SELECT문을 나타내지 않는데 INTO 절이 있으면 SQL_ERROR Exception이 발생한다.
