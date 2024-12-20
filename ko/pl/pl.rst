@@ -182,7 +182,7 @@ SELECT 문을 :ref:`커서 선언 <cursor_decl>`\이나 :ref:`OPEN-FOR <cursor_m
         ...
     END;
 
-SELECT 문이 INTO 절을 포함한 경우 조회 결과는 한 건 그리고 단 한 건의 결과 레코드를 가져야 한다.
+ INTO절을 포함안 SELECT 문의 조회 결과는 한 건의 결과 레코드여야 하며, 두건 이상의 결과를 가져오는 경우는 TOO_MANY_ROWS Exception이 발생한다.
 결과가 없을 때는 NO_DATA_FOUND Exception이 발생하고 결과가 두 건 이상일 때는 TOO_MANY_ROWS Exception이 발생한다.
 
 Static SQL 문의 WHERE 절이나 VALUES 절 안에서처럼 값을 필요로 하는 자리에
