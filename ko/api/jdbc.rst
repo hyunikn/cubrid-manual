@@ -208,7 +208,7 @@ JDBC 프로그래밍
        *   기본 값은 1 (메가 바이트)
 
     *  **usePreparedStmtCache**: Prepared Statement 캐시 여부 (기본값: false)
-    *  **preparedStmtCacheSize**: usePreparedStmtCache가 TRUE일 경우, 캐싱할 수 있는 갯수  (기본:25, 최소:1, 최대:2147483647)
+    *  **preparedStmtCacheSize**: usePreparedStmtCache가 TRUE일 경우, 캐싱할 수 있는 개수  (기본:25, 최소:1, 최대:2147483647)
     *  **preparedStmtCacheSqlLimit**: usePreparedStmtCache가 TRUE일 경우, 캐싱할 수 있는 SQL의 길이 (기본:256, 최소:1, 최대:2147483647)
     *  **hold_cursor**: 커서 유지 기능 설정(기본값: true). 이 값이 false 이면 CLOSE_CURSORS_AT_COMMIT이 설정되고, true 이면 HOLD_CURSORS_OVER_COMMIT이 설정된다. 자세한 내용은 :ref:`cursor-holding`\ 을 참고한다.
 
