@@ -341,7 +341,41 @@ CSQL 시작 옵션
 
 CSQL 인터프리터에는 SQL 문 이외에 CSQL 인터프리터를 제어하는 특별한 명령어가 있으며 이를 세션 명령어라고 한다. 모든 세션 명령어는 반드시 세미콜론(;)으로 시작해야 한다.
 
-**;help** 를 입력하여 CSQL 인터프리터에서 지원되는 세션 명령어를 확인할 수 있다. 세션 명령어를 전부 입력하지 않고 대문자로 표시된 글자까지만 입력해도 CSQL 인터프리터는 세션 명령어를 인식한다. 세션 명령어는 대소문자를 구분하지 않는다. 
+**;help** 를 입력하여 CSQL 인터프리터에서 지원되는 세션 명령어를 확인할 수 있다. 세션 명령어를 전부 입력하지 않고 대문자로 표시된 글자까지만 입력해도 CSQL 인터프리터는 세션 명령어를 인식한다. 세션 명령어는 대소문자를 구분하지 않는다.
+
+CSQL은 SQL의 문자열 리터럴, 주석, 식별자를 (참고: :ref:`작성 규칙 <lexical_rules>`) 인식하면서 동작한다. 특히,
+
+* 작은 따옴표로 둘러싸인 문자열 리터럴
+* --, //, /\* \*/ 로 표시되는 주석
+* 큰따옴표, 대괄호, 백틱 부호로 둘러싸인 식별자
+
+안에 위치하는 문자열은 이들의 밖에서 가질 수 있는 고유의 의미를 잃고 오로지 문자열로만 인식되는데,
+이것은 세션 명령어에 대해서도 마찬가지이다.
+예를 들어, 아래 문자열 리터럴, 주석, 식별자 안의 ';exit'은 세션 명령어로서 동작하지 않고 문자열로만 인식된다. ::
+
+    csql> select * from table_a where col = ';exit';
+    ...
+    csql> select * from table_b /* ;exit on no results */;
+    ...
+    csql> create table table_c([;exit] int);
+    ...
+
+예외적으로 대화형 모드 CSQL에서는 명령행의 첫문자가 세미콜론인 경우 리터럴, 주석, 식별자 처리중이여도 해당 문자열은 세션 명령어로 인식한다. ::
+
+    csql> select * from table_a where col = '
+    csql> ;exit    <-- CSQL 종료
+    ...
+    csql> select * from table_b /*
+    csql> ;exit    <-- CSQL 종료
+    ...
+    csql> create table table_c([
+    csql> ;exit    <-- CSQL 종료
+    ...
+
+이 예외는 CSQL을 종료한다거나 (:ref:`;exit <scmd_exit>`),
+편집하던 내용을 에디터로 이어서 편집한다거나 (:ref:`;edit <scmd_edit>`),
+질의 버퍼를 비운다거나 (:ref:`;clear <scmd_clear>`) 하는 등의 작업을
+편집 위치에 상관없이 언제나 가능하도록 하기 위해서 필요하다.
 
 "질의 버퍼"는 질의문을 실행하기 전까지 질의문을 저장하는 버퍼이다. **\-\-no-single-line** 옵션을 부여하여 CSQL을 실행하는 경우 **;xr** 명령으로 질의를 실행하기 전까지는 질의문을 버퍼에 유지한다.
 
@@ -450,11 +484,15 @@ CSQL 인터프리터를 실행한 현재 작업 디렉터리를 지정된 디렉
     csql> ;cd /home1/DBA/CUBRID
     Current directory changed to  /home1/DBA/CUBRID.
 
+.. _scmd_exit:
+
 **CSQL 인터프리터 종료(;EXit)**
 
 CSQL 인터프리터를 종료한다. ::
 
     csql> ;ex
+
+.. _scmd_clear:
 
 **질의 버퍼 초기화(;CLear)**
 
@@ -581,9 +619,9 @@ CSQL 인터프리터에서 작업 중인 데이터베이스 이름 및 호스트
     === Get Param Input ===
     isolation_level="tran_rep_class_commit_instance"
 
-**파라미터 값 설정(;SEt)**
+**파라미터 값 설정(;SET)**
 
-특정 파라미터의 값을 설정하기 위해서는 **;Set** 세션 명령어를 사용한다. 동적 변경이 가능한 파라미터만 값을 변경할 수 있으며, 서버 파라미터는 DBA 권한이 있어야만 값을 변경할 수 있다. 동적 변경이 가능한 파라미터 목록은 :ref:`broker-configuration` 를 참고한다. ::
+특정 파라미터의 값을 설정하기 위해서는 **;set** 세션 명령어를 사용한다. 동적 변경이 가능한 파라미터만 값을 변경할 수 있으며, 서버 파라미터는 DBA 권한이 있어야만 값을 변경할 수 있다. 동적 변경이 가능한 파라미터 목록은 :ref:`broker-configuration` 를 참고한다. ::
 
     csql> ;set block_ddl_statement=1
     === Set Param Input ===
@@ -1364,6 +1402,40 @@ OPT LEVEL의 상세한 내용은 :ref:`viewing-query-plan`\ 를 참고한다.
     csql> ;time
     TIME IS ON
 
+**서버 저장 메시지 출력(;SERver-output)**
+
+이 값을 ON으로 설정하면 서버의 DBMS_OUTPUT 버퍼에 저장된 메시지를 출력한다. 기본값은 OFF이다.
+DBMS_OUTPUT 버퍼는 주로 PL/CSQL 저장 프로시저/함수에서 DBMS_OUTPUT.put_line() 호출을 통해 쌓인 메시지들을 저장하고 있다.
+DBMS_OUTPUT 메시지들은 CSQL이 실행한 SQL 문의 결과 출력 후에 '<DBMS_OUTPUT>'  표시와 함께 출력된다.
+저장프로시스에서 오류 발생시 DBMS_OUTPUT.put_line()으로 출력한 메세지들은 실행 순서와 관계없이 에러메시지 출력 후 출력되므로 주의가 필요하다.
+
+    csql> ;server-output on
+    SERVER OUTPUT IS ON
+    csql>
+    csql> create or replace function late_message return integer as
+    csql> begin
+    csql>     DBMS_OUTPUT.put_line('Hello world');
+    csql>     return (1/0);   -- ZERO_DIVIDE exception
+    csql> end;
+    Execute OK. (0.024973 sec) Committed. (0.000000 sec)
+
+    1 command(s) successfully processed.
+    csql>
+    csql> select late_message() from dual;
+
+    In line 2, column 23,
+
+    ERROR: Stored procedure execute error:
+      (line 4, column 13) division by zero
+
+    <DBMS_OUTPUT>
+    ====
+    Hello world
+
+    0 command(s) successfully processed.
+    csql>
+
+
 **질의 결과를 칼럼 당 한 라인으로 출력(;LINe-output)**
 
 이 값을 **ON** 으로 설정하면 질의 결과 레코드를 칼럼 당 한 라인으로 출력한다. 기본 설정은 OFF로서, 한 레코드는 한 라인으로 출력한다. ::
@@ -1400,6 +1472,8 @@ OPT LEVEL의 상세한 내용은 :ref:`viewing-query-plan`\ 를 참고한다.
 **;HISTORYRead** 세션 명령어를 사용해 지정된 **;HISTORYList** 에서 확인한 수행 번호에 해당하는 내용을 명령어 버퍼로 불러올 수 있다. 해당 SQL 문을 직접 입력한 것과 같은 상태이므로 바로 **;run** 또는 **;xrun** 를 입력할 수 있다. ::
 
     csql> ;historyread 1
+
+.. _scmd_edit:
 
 **기본 편집기를 호출(;EDIT)**
 
