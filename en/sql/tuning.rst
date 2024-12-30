@@ -2,6 +2,8 @@
 :meta-keywords: cubrid update statistics, cubrid check statistics, query plan, query profiling, sql hint, cubrid index hint, cubrid special index, cubrid using index
 :meta-description: How to optimize query execution in CUBRID database.
 
+.. include:: join_method.inc
+
 Updating Statistics
 ===================
 
@@ -264,6 +266,7 @@ The following show the meaning for each term which is printed as a query plan.
     *   nl-join: Nested loop join
     *   m-join: Sort merge join
     *   idx_join: Nested loop join, and it is a join which uses an index in the inner table as reading rows of the outer table.
+    *   hash-join: Hash join
     
 *   Join type: It is printed as "(inner join)" on the above. The following are the join types which are printed on the query plan.
     
@@ -669,6 +672,8 @@ Using hints can affect the performance of query execution. You can allow the que
     USE_NL [ (<spec_name_comma_list>) ] |
     USE_IDX [ (<spec_name_comma_list>) ] |
     USE_MERGE [ (<spec_name_comma_list>) ] |
+    USE_HASH [ (<spec_name_comma_list>) ] |
+    NO_USE_HASH [ (<spec_name_comma_list>) ] |
     ORDERED |
     LEADING |
     USE_DESC_IDX |
@@ -709,6 +714,8 @@ The following hints can be specified in **UPDATE**, **DELETE** and **SELECT** st
 
 *   **USE_NL**: Related to a table join, the query optimizer creates a nested loop join execution plan with this hint.
 *   **USE_MERGE**: Related to a table join, the query optimizer creates a sort merge join execution plan with this hint.
+*   **USE_HASH**: Related to a table join, the query optimizer creates a hash join execution plan with this hint. see :ref:`join-method_hash`.
+*   **NO_USE_HASH**: Related to a table join, The query optimizer does not create a hash join execution plan with this hint. see :ref:`join-method_hash`.
 *   **ORDERED**: Related to a table join, the query optimizer create a join execution plan with this hint, based on the order of tables specified in the **FROM** clause. The left table in the **FROM** clause becomes the outer table; the right one becomes the inner table.
 *   **LEADING**: Related to a table join, the query optimizer create a join execution plan with this hint, based on the order of tables specified in the **LEADING** hint.
 *   **USE_IDX**: Related to an index, the query optimizer creates an index join execution plan corresponding to a specified table with this hint.
@@ -1195,12 +1202,12 @@ On the above example, if you use "**USING INDEX** *idx_open_bugs*" or "**USE IND
             CREATE TABLE t (a INT, b INT);
             
             -- IS NULL cannot be used with expressions
-            CREATE INDEX idx ON t (a) WHERE (not a) IS NULL;
+            CREATE INDEX idx ON ta (a) WHERE (not ta.a<>0 ) IS NULL;
 
         ::
         
             ERROR: before ' ; '
-            Invalid filter expression (( not t.a<>0) is null ) for index.
+            Invalid filter expression (( not [dba.ta].a<>0) is null ) for index.
              
         .. code-block:: sql
 
@@ -1417,9 +1424,42 @@ The following example shows that the index is used as a covering index because c
                 1            2            3
                 4            5            6
 
+The following example shows an optimization that reduces unnecessary scans when the **SELECT** list only contains **COUNT(*)** when using a covering index.
+
+.. code-block:: sql
+
+    -- insert dummy data
+    INSERT INTO t select rownum % 8, rownum % 100, rownum % 1000 FROM dual connect by level <= 40000;
+    
+    -- csql> ;trace on
+    
+    -- count(*) optimization
+    SELECT count(*) FROM t WHERE col1 < 9;
+    
+::
+    
+    Trace Statistics:
+      SELECT (time: 1, fetch: 66, fetch_time: 0, ioread: 0)
+        SCAN (index: dba.t.i_t_col1_col2_col3), (btree time: 1, fetch: 65, ioread: 0, readkeys: 1002, filteredkeys: 0, rows: 0, covered: true, count_only: true)
+
+.. code-block:: sql
+
+    -- no count(*) optimization
+    SELECT count(col1) FROM t WHERE col1 < 9;
+    
+::
+    
+    Trace Statistics:
+      SELECT (time: 13, fetch: 180, fetch_time: 0, ioread: 0)
+        SCAN (index: dba.t.i_t_col1_col2_col3), (btree time: 8, fetch: 179, ioread: 0, readkeys: 1002, filteredkeys: 0, rows: 40002, covered: true)
+
+.. note::
+
+    **COUNT(*)** optimization for a single table when using a covering index is supported from CUBRID 11.2, and **COUNT(*)** optimization for join tables is supported from CUBRID 11.3.
+
 .. warning::
 
-    If the covering index is applied when you get the values from the **VARCHAR** type column, the empty strings that follow will be truncated. If the covering index is applied to the execution of query optimization, the resulting query value will be retrieved. This is because the value will be stored in the index with the empty string being truncated.
+    When a covering index is applied to retrieve values from a **VARCHAR** type column, any trailing empty strings will be truncated. This occurs because the empty string is stored in the index with the trailing spaces removed, affecting the query results when the index is used for query optimization.
 
     If you don't want this, use the **NO_COVERING_IDX** hint, which does not use the covering index function. If you use the hint, you can get the result value from the data area rather than from the index area.
 
@@ -4189,6 +4229,56 @@ The user can check the query to be cached or not by putting the session command 
       ref_count = 1
       deletion_marker = false
     }
+
+The cached query is shown as **query_string** in the middle of the result screen. **n_entries** and **n_pages** represent the number of cached queries and the number of pages in the cached results, respectively. **n_entries** is limited by the value of the configuration parameter **max_QUERY_CACHE_entries**, and **n_pages** is limited by the value of the configuration parameter **QUERY_CACHE_size_in_pages**. If **n_entries** or **n_pages** overflow, some candidates among the cache entries are selected and uncached. The number of candidates is approximately 20% of the **max_QUERY_CACHE_entries** value and the **QUERY_CACHE_size_in_pages** value.
+
+Since version 11.4, subqueries can also be cached, and the subqueries that can be cached are as follows.
+
+1) CTE query
+When the QUERY_CACHE hint is specified in a non-recursive query included in the WITH clause
+
+.. code-block:: sql
+
+        WITH
+         of_drones AS (SELECT /*+ QUERY_CACHE */ item, 'drones' FROM products WHERE parent_id = 1),
+         of_cars AS (SELECT /*+ QUERY_CACHE */ item, 'cars' FROM products WHERE parent_id = 5)
+        SELECT * FROM of_drones UNION ALL SELECT * FROM of_cars ORDER BY 1;
+
+When the QUERY_CACHE hint is specified in a recursive query included in the WITH clause and no other CTE is referenced.
+
+.. code-block:: sql
+
+        WITH
+         RECURSIVE cars (id, parent_id, item, price) AS (
+                            SELECT /*+ QUERY_CACHE */ id, parent_id, item, price
+                                FROM products WHERE item LIKE 'Car%'
+                            UNION ALL
+                            SELECT /*+ QUERY_CACHE */ p.id, p.parent_id, p.item, p.price
+                                FROM products p
+                            INNER JOIN cars rec_cars ON p.parent_id = rec_cars.id)
+        SELECT item, price FROM cars ORDER BY 1;
+
+In the UNION query above, the first query is cached, but the second query is not cached because it references another table.
+
+2) When the QUERY_CACHE hint is specified in a subquery that does not refer to another table
+
+.. code-block:: sql
+
+        SELECT h.host_year, (SELECT /*+ QUERY_CACHE */ host_nation FROM olympic o WHERE o.host_year > 1994 limit 1) AS host_nation, h.event_code, h.score, h.unit
+        FROM history h;
+
+        SELECT name, capital, list(SELECT /*+ QUERY_CACHE */ host_city FROM olympic WHERE host_nation like 'K%') AS host_cities
+        FROM nation;
+
+However, if another table is referenced within a subquery as shown below, the query is not cached even if the QUERY_CACHE hint is specified.
+
+.. code-block:: sql
+
+        SELECT h.host_year, (SELECT /*+ QUERY_CACHE */ host_nation FROM olympic o WHERE o.host_year=h.host_year) AS host_nation, h.event_code, h.score, h.unit
+        FROM history h;
+
+        SELECT name, capital, list(SELECT /*+ QUERY_CACHE */ host_city FROM olympic WHERE host_nation = name) AS host_cities
+        FROM nation;
 
 The cached query is shown as **query_string** in the middle of the result screen. Each of the **n_entries** and **n_pages** represents the number of cached queries and the number of pages in the cached results. The **n_entries** is limited to the value of configuration parameter **max_query_cache_entries** and the **n_pages** is limited to the value of **query_cache_size_in_pages**. If the **n_entries** is overflown or the **n_pages** is overflown, some victims among the cache entries are selected and they are uncached. The number of victims is about 20% of **max_query_cache_entries** value and of the **query_cache_size_in_pages** value.
 
