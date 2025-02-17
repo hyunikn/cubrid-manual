@@ -409,7 +409,7 @@ SQL에서 제공하는 데이터 타입 중 PL/CSQL에서 지원하는 것과 �
 <table>.<column>%TYPE은 CREATE PROCEDURE/FUNTION 문을 실행하는 시점에 지정된 테이블 컬럼의 타입을 나타내지만,
 나중에 그 컬럼의 타입이 변경되어도 자동으로 <table>.<column>%TYPE을 사용한 저장 프로시저/함수의 동작에 반영되지는 않는다.
 그러므로, %TYPE을 적용한 테이블 컬럼의 타입이 변경되었을 때는 그 %TYPE을 사용한 저장 프로시저/함수에 대해서 모두
-ALTER PROCEDURE/FUNCTION <name> REBUILD 문을 실행해서 재컴파일해 주어야 한다.
+ALTER PROCEDURE/FUNCTION <name> COMPILE 문을 실행해서 재컴파일해 주어야 한다.
 
 테이블 컬럼 뿐만 아니라 프로시저/함수의 인자나 변수 이름 뒤에 %TYPE을 덧붙여 그 인자나 변수의 타입을 나타낼 수 있다.
 
@@ -570,7 +570,7 @@ Static SQL UPDATE 문에도 다음과 같이 'SET ROW = <record>' 구문을 사�
 
 :ref:`PL/CSQL에서 지원하는 데이터 타입 <datatype_index>` 중에 NUMERIC은 정밀도와 스케일을,
 CHAR와 VARCHAR는 길이를 지정할 수 있다.
-그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입에는 예외적으로 정밀도와 스케일 지정이 허용되지 않는다.
+그러나, 저장 프로시저/함수의 인자 타입과 리턴 타입에는 정밀도와 스케일 지정이 허용되지 않는다.
 내부 프로시저/함수에서도 마찬가지이다.
 
 .. code-block:: sql
@@ -579,11 +579,11 @@ CHAR와 VARCHAR는 길이를 지정할 수 있다.
     CREATE OR REPLACE FUNCTION sf(a NUMERIC) RETURN VARCHAR AS ...              -- OK
 
 그리고, 일반적으로 정밀도와 스케일이 생략된 NUMERIC은 NUMERIC(15, 0)을 의미하지만
-예외적으로 인자 타입과 리턴 타입 자리에서는 임의의 정밀도와 스케일을 허용하는 것으로 동작한다
-(단, 정밀도는 1 이상 38 이하,  스케일은 0 이상 정밀도 이하 범위).
-또한, CHAR와 VARCHAR도 인자 타입과 리턴 타입 자리에서는 기본 스케일 값인 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이
-아니라 임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다
-(단, CHAR 길이는 2048 이하, VARCHAR의 길이는 1073741823 이하 범위).
+예외적으로 인자 타입 자리에서는 임의의 정밀도와 스케일을 허용함을 의미하고
+(단, 정밀도는 1 이상 38 이하,  스케일은 0 이상 정밀도 이하 범위),
+리턴 타입 자리에서는 NUMERIC(p, s)를 의미한다.
+여기서 p와 s는 :ref:`시스템 설정 파라미터 <system_config>` stored_procedure_return_numeric_size에서
+지정하는 정밀도와 스케일을 나타낸다. p와 s의 디폴트 값은 각각 38과 15이다.
 
 .. code-block:: sql
 
@@ -593,9 +593,16 @@ CHAR와 VARCHAR는 길이를 지정할 수 있다.
         return a;
     END;
 
-    SELECT test_any_precision_scale(1.23);      -- 결과: 1.23
-    SELECT test_any_precision_scale(1.234);     -- 결과: 1.234
-    SELECT test_any_precision_scale(1.2345);    -- 결과: 1.2345
+    SELECT test_any_precision_scale(1.23);      -- 결과: 1.230000000000000
+    SELECT test_any_precision_scale(1.234);     -- 결과: 1.234000000000000
+    SELECT test_any_precision_scale(1.2345);    -- 결과: 1.234500000000000
+
+또한, CHAR와 VARCHAR도 인자 타입과 리턴 타입 자리에서는
+다른 자리에서처럼 CHAR(1)과 VARCHAR(1073741823)를 나타내는 것이 아니라
+임의의 길이를 갖는 문자열을 허용하는 것으로 동작한다
+(단, CHAR 길이는 2048 이하, VARCHAR의 길이는 1073741823 이하 범위).
+
+.. code-block:: sql
 
     CREATE OR REPLACE FUNCTION test_any_length(a CHAR) return CHAR
     AS
@@ -608,21 +615,21 @@ CHAR와 VARCHAR는 길이를 지정할 수 있다.
     SELECT test_any_length('abcd');     -- 결과: 'abcd'
 
 인자 타입과 리턴 타입을 :ref:`%TYPE <percent_type>`\을 사용해서 지정했을 때에도 참조되는 원래 타입의
-정밀도, 스케일 및 길이 지정은 무시되고 대신 임의의 정밀도, 스케일, 길이를 허용하는 것으로 동작한다.
+정밀도, 스케일 및 길이 지정은 무시되고 위에 기술한 방식으로 동작한다.
 
 .. code-block:: sql
 
     CREATE TABLE tbl(p NUMERIC(3,2), q CHAR(3));
 
-    CREATE OR REPLACE FUNCTION test_ptype_precision_scale(a tbl.p%TYPE) RETURN NUMERIC
+    CREATE OR REPLACE FUNCTION test_ptype_precision_scale(a tbl.p%TYPE) RETURN tbl.p%TYPE
     AS
     BEGIN
         RETURN a;
     END;
 
-    SELECT test_ptype_precision_scale(1.23);      -- 결과: 1.23
-    SELECT test_ptype_precision_scale(1.234);     -- 결과: 1.234
-    SELECT test_ptype_precision_scale(1.2345);    -- 결과: 1.2345
+    SELECT test_ptype_precision_scale(1.23);      -- 결과: 1.230000000000000
+    SELECT test_ptype_precision_scale(1.234);     -- 결과: 1.234000000000000
+    SELECT test_ptype_precision_scale(1.2345);    -- 결과: 1.234500000000000
 
     CREATE OR REPLACE FUNCTION test_ptype_length(a tbl.q%TYPE) RETURN tbl.q%TYPE
     AS
@@ -633,22 +640,6 @@ CHAR와 VARCHAR는 길이를 지정할 수 있다.
     SELECT test_ptype_length('ab');       -- 결과: 'ab'
     SELECT test_ptype_length('abc');      -- 결과: 'abc'
     SELECT test_ptype_length('abcd');     -- 결과: 'abcd'
-
-단, %TYPE 사용과 관련해서 한 가지 예외가 있다. 함수의 리턴 타입에 %TYPE이 사용되고 참조되는 원래 타입이
-NUMERIC(p, s) 이면 원래 타입의 정밀도 p와 스케일 s가 유지된다.
-
-.. code-block:: sql
-
-    CREATE OR REPLACE FUNCTION test_return_ptype_numeric(a tbl.p%TYPE) RETURN tbl.p%TYPE
-    AS
-    BEGIN
-        RETURN a;
-    END;
-
-    SELECT test_return_ptype_numeric(1.23);      -- 결과: 1.23
-    SELECT test_return_ptype_numeric(1.234);     -- 결과: 1.23
-    SELECT test_return_ptype_numeric(1.2345);    -- 결과: 1.23
-    SELECT test_return_ptype_numeric(12.345);    -- Error: 스케일 2로 반올림한 값 12.34가 정밀도 3을 초과
 
 연산자와 함수
 ==================
@@ -784,12 +775,12 @@ CSQL에서 athlete 테이블에 존재하지 않는 이름을 인자로 주어 N
 위에서 위치 (1, 22)는 SELECT 문 안에서의 위치를 나타내고, (6, 5)는 athlete_code()를 선언한 CREATE 문 안에서의
 위치를 나타낸다.
 
-서버 설정 적용
+시스템 설정 적용
 ==========================
 
-Static/Dynamic SQL 문의 동작은 :ref:`서버 설정 파라미터 <system_config>` 전체의 영향을 동일하게 받는다.
+Static/Dynamic SQL 문의 동작은 :ref:`시스템 설정 파라미터 <system_config>` 전체의 영향을 동일하게 받는다.
 
-Static/Dynamic SQL 제외한 PL/CSQL 문에서는 다음 4개 서버 설정 파라미터만이 유효하다.
+Static/Dynamic SQL 제외한 PL/CSQL 문에서는 다음 4개 시스템 설정 파라미터만이 유효하다.
 
 * compat_numeric_division_scale
 * oracle_compat_number_behavior
@@ -815,7 +806,7 @@ Static/Dynamic SQL 제외한 PL/CSQL 문에서는 다음 4개 서버 설정 파�
         END IF;
     END;
 
-이들 설정의 자세한 의미는 :ref:`서버 설정 파라미터 <system_config>`\를 참조할 수 있다.
+이들 설정의 자세한 의미는 :ref:`시스템 설정 파라미터 <system_config>`\를 참조할 수 있다.
 
 위 4개 외 다른 설정은 Static/Dynamic SQL 제외한 PL/CSQL 문에서 유효하지 않다. 특히,
 
