@@ -144,7 +144,6 @@ PUT_LINE 함수는 저장 함수 개발자가 사용하고 ENABLE, DISABLE, GET_
 
         <DBMS_OUTPUT>       <-- 출력할 메시지를 가져오기 위해 내부적으로 DBMS_OUTPUT.GET_LINE 여러 번 호출
         ====
-        Hello world
         Hello, World!
         Hello, CUBRID!
         Hello, DBMS_OUTPUT!
